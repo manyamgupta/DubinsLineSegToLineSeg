@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from numpy import pi,cos,sin
 import numpy as np
+import utils
 
 def PlotDubinsPath(dubPath,fmt):
     qs, _ = dubPath.sample_many(.02)    
@@ -16,6 +17,13 @@ def PlotDubPathSegments(iniConf, pathMode, segLengths, rho, fmt):
     for k in range(len(pathMode)):
         startConf = PlotSegment(startConf, segLengths[k], pathMode[k], rho, fmt)
 
+    return
+
+def PlotParalellogram(prlGrm, fmt):
+    prlGrm.append(prlGrm[0])
+    for k in range(4):
+        utils.PlotLineSeg(prlGrm[k], prlGrm[k+1], fmt)
+    
     return
 
 def PlotSegment(startConf, segLength, segType, rho, fmt):
@@ -43,6 +51,12 @@ def PlotSegment(startConf, segLength, segType, rho, fmt):
 
 
     return finalConf
+
+def PathTypeNum(ptype):
+
+    typesList = ['L', 'R', 'S', 'LR', 'RL', 'LS', 'RS', 'SL', 'SR', 'LSL', 'RSR', 'LSR', 'RSL', 'LRL', 'RLR']
+    return typesList.index(ptype)+1
+    
 
 def RotSenseSeq(pathMode):
 

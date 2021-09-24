@@ -43,8 +43,8 @@ def DubinsToPrlgrm(prlGrm, finHdng, rho):
     for k in range(4):
                 
         lineSeg = np.array([prlGrm[k], prlGrm[k+1]])
-        # Path Type S to any point on paralellogram edges with given final heading
 
+        # Path Type S to any point on paralellogram edges with given final heading
         finPos, lengthS = dls.PathStoFinHdng(lineSeg, finHdng )
         if np.isfinite(finPos[0]):
             lengthsVec.append(lengthS)
@@ -102,17 +102,19 @@ def DubinsToPrlgrm(prlGrm, finHdng, rho):
             lengthsVec.append(lengthRSR_min)
             configsList.append(( (finPos[0], finPos[1], finHdng), 'RSR', [pathRSR.segment_length(0), pathRSR.segment_length(1), pathRSR.segment_length(2)] ) )
 
-        # Path Type RSR_min to any point on paralellogram edges with given final heading
+        # Path Type LSR_min to any point on paralellogram edges with given final heading
         finPos, lengthLSR_min, pathLSR = dls.LocalMinLSR(lineSeg, finHdng, rho)
         if np.isfinite(finPos[0]):   
             lengthsVec.append(lengthLSR_min)
             configsList.append(( (finPos[0], finPos[1], finHdng), 'LSR', [pathLSR.segment_length(0), pathLSR.segment_length(1), pathLSR.segment_length(2)] ) )
 
+        # Path Type RSL_min to any point on paralellogram edges with given final heading
         finPos, lengthRSL_min, pathRSL = dls.LocalMinRSL(lineSeg, finHdng, rho)
         if np.isfinite(finPos[0]):   
             lengthsVec.append(lengthRSL_min)
             configsList.append(( (finPos[0], finPos[1], finHdng), 'RSL', [pathRSL.segment_length(0), pathRSL.segment_length(1), pathRSL.segment_length(2)] ) )
 
+        # Path Type LRL_feas to any point on paralellogram edges with given final heading
         finPosList, lengthsList = dls.LRLFeasLimits(lineSeg, finHdng, rho)
         for j in range(len(finPosList)):
             finPos = finPosList[j]
@@ -120,6 +122,7 @@ def DubinsToPrlgrm(prlGrm, finHdng, rho):
             lengthsVec.append(lengthsLRL[0])
             configsList.append(( (finPos[0], finPos[1], finHdng), 'LRL', lengthsLRL[1:4] ) )
 
+        # Path Type RLR_feas to any point on paralellogram edges with given final heading
         finPosList, lengthsList = dls.RLRFeasLimits(lineSeg, finHdng, rho)
         for j in range(len(finPosList)):
             finPos = finPosList[j]
@@ -140,7 +143,7 @@ if __name__ == "__main__":
     # prlGrm = [(-2,-1), (3,-1),(4,5),(-1,5)]
     prlGrm = [(2,-1), (7,-1),(8,5),(3,5)]
 
-    finHdng =6
+    finHdng =5
     rho=1
     plotformat = namedtuple("plotformat","color linewidth linestyle marker")
 
@@ -151,10 +154,7 @@ if __name__ == "__main__":
     print(f"{lengthsVec=}")
     print(f"{computation_time=}")
 
-
-    prlGrm.append(prlGrm[0])
-    for k in range(4):
-        utils.PlotLineSeg(prlGrm[k], prlGrm[k+1], plotformat('g',2,'-','x'))
+    du.PlotParalellogram(prlGrm, plotformat('g',2,'-','x'))
     utils.PlotArrow([0,0],0,1, plotformat('c',2,'--','x'))
     du.PlotDubPathSegments([0,0,0],minConfig[1],minConfig[2],rho, plotformat('b',2,'-',''))
     plt.axis('equal')
@@ -162,12 +162,11 @@ if __name__ == "__main__":
     # cmap = mpl.cm.ScalarMappable(norm=norm, cmap=mpl.cm.Blues)
     # cmap.set_array([])
     plt.figure()
-    for k in range(4):
-        utils.PlotLineSeg(prlGrm[k], prlGrm[k+1], plotformat('g',2,'-','x'))
-    utils.PlotArrow([0,0],0,1, plotformat('c',2,'--','x'))
-    for config in configsList:
-        # if config[1] == minConfig[1]:            
-        du.PlotDubPathSegments([0,0,0],config[1],config[2],rho, plotformat(np.random.random(3),2,'--',''))
 
-    plt.axis('equal')
+    for config in configsList:
+        du.PlotParalellogram(prlGrm, plotformat('g',2,'-','x'))
+        utils.PlotArrow([0,0],0,1, plotformat('c',2,'--','x'))
+        plt.subplot(4, 4, du.PathTypeNum(config[1]))        
+        du.PlotDubPathSegments([0,0,0],config[1],config[2],rho, plotformat(np.random.random(3),2,'--',''))
+        plt.axis('equal')
     plt.show()
