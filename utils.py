@@ -1,0 +1,151 @@
+from numpy import pi,cos,sin
+import numpy as np
+import matplotlib.pyplot as plt
+
+def IntersectionLineSegments(p1,p2,p3,p4):
+    # https://math.stackexchange.com/questions/3176543/intersection-point-of-2-lines-defined-by-2-points-each
+    n = p2-p1
+    m = p3-p4
+    p = p3-p1
+
+    D = n[0]*m[1]-n[1]*m[0]
+    if np.abs(D) < 1e-6:
+        return [np.nan, np.nan]
+    Qx = m[1]*p[0]-m[0]*p[1]
+    t = Qx/D
+    
+    intPt = p1+t*(p2-p1)
+
+    return intPt
+    
+def CheckPtLiesInsideLineSeg(a,b,c):
+# check if point c lies inside line segment ab, assume abc are collinear
+
+    if np.dot(c-a,b-c)>0:
+        return True
+    else:
+        return False
+    
+    
+def RotateCoords(coords, theta):
+    R = np.matrix([[cos(theta), -sin(theta)],[sin(theta), cos(theta)]])  
+    coords = np.matrix([coords[0], coords[1]])
+    corods = coords.T
+    coordsRot = R*corods
+    
+    return [coordsRot[0,0], coordsRot[1,0]]
+
+# def PlotCircle(C, r,col):
+#     alVec = np.linspace(0,2*pi,1000)
+
+#     tc_x = C[0]+r*cos(alVec)
+#     tc_y = C[1]+r*sin(alVec)
+#     plt.plot(tc_x, tc_y, col,zorder=0) 
+    
+def PlotArc(C, r, phis,col):
+
+    alVec = np.linspace(phis[0],phis[1],100)
+
+    tc_x = C[0]+r*cos(alVec)
+    tc_y = C[1]+r*sin(alVec)
+    plt.scatter(C[0], C[1], marker='x', color=col)
+    plt.plot(tc_x, tc_y, col) 
+    
+
+def Angdiff(ti, tf ):
+   
+    ti = np.mod(ti, 2*pi)
+    tf = np.mod(tf, 2*pi)
+    
+    if (InInt(ti, tf, 0)):
+        diff = tf+(2*pi-ti)
+    else:
+        diff = tf-ti
+        
+    diff = np.abs(diff)        
+    
+    return diff
+    
+def InInt(lb, ub, t ):   
+    
+    lb = np.mod(lb, 2*pi)
+    ub = np.mod(ub, 2*pi)
+    t = np.mod(t, 2*pi) 
+    if (lb >= ub):
+        if(t >= lb or t <= ub):
+            return True
+        else:
+            return False
+    else:
+        if(t >= lb and t <= ub):
+            return True
+        else:
+            return False
+            
+def MidAng(lb, ub ):  
+    
+    lb = np.mod(lb, 2*pi)
+    ub = np.mod(ub, 2*pi)
+    
+    
+    if InInt(lb, ub, 0 ):
+        
+        midang = (lb-2*pi+ub)/2
+        midang = np.mod(midang, 2*pi)
+        return midang
+        
+    else:
+        
+        midang = (lb+ub)/2
+        midang = np.mod(midang, 2*pi)
+        return midang
+          	
+def PlotPolygon(vertices, segments, col):
+
+    vertices = np.array(vertices)
+    segments = np.array(segments)
+    numSegs = np.size(segments, 0)
+
+    for i in range(numSegs):
+        seg = segments[i,:]
+        vertsSeg = vertices[seg,:]
+        plt.plot(vertsSeg[:,0], vertsSeg[:,1], color=col, linewidth=2)
+
+    return
+
+def PlotCircle(C, r,fmt):
+    alVec = np.linspace(0,2*pi,1000)
+
+    tc_x = C[0]+r*cos(alVec)
+    tc_y = C[1]+r*sin(alVec)
+    plt.plot(tc_x, tc_y, color=fmt.color, linewidth=fmt.linewidth, linestyle=fmt.linestyle,zorder=0) 
+    plt.scatter(C[0], C[1],marker='x')
+
+    return
+
+def PlotArc(C, r, phis,fmt):
+
+    alVec = np.linspace(phis[0],phis[1],100)
+
+    tc_x = C[0]+r*cos(alVec)
+    tc_y = C[1]+r*sin(alVec)
+    plt.scatter(C[0], C[1], color=fmt.color, marker=fmt.marker)
+    plt.plot(tc_x, tc_y, color=fmt.color, linewidth=fmt.linewidth, linestyle=fmt.linestyle) 
+
+    return
+
+def PlotArrow(p1, hdng, arrLen, fmt):
+
+    p2 = p1 + arrLen*np.array([cos(hdng), sin(hdng)])
+    dx = arrLen*np.cos(hdng)
+    dy = arrLen*np.sin(hdng)
+
+    # plt.plot([p1[0],p2[0]], [p1[1],p2[1]], color=fmt.color, linewidth=fmt.linewidth, linestyle=fmt.linestyle)     
+    plt.arrow(p1[0],p1[1],dx,dy,head_width=.1*np.sqrt(dx**2+dy**2),color=fmt.color,linewidth=fmt.linewidth, linestyle=fmt.linestyle)
+    return
+
+def PlotLineSeg(p1, p2, fmt):
+
+    plt.plot([p1[0],p2[0]], [p1[1],p2[1]], color=fmt.color, linewidth=fmt.linewidth, linestyle=fmt.linestyle) 
+
+    return
