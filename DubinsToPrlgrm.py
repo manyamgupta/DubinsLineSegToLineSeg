@@ -169,6 +169,5 @@ if __name__ == "__main__":
         # if config[1] == minConfig[1]:            
         du.PlotDubPathSegments([0,0,0],config[1],config[2],rho, plotformat(np.random.random(3),2,'--',''))
 
-
     plt.axis('equal')
     plt.show()
