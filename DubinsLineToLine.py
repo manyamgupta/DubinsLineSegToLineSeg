@@ -1,3 +1,6 @@
+# Author: Satyanarayana Gupta Manyam
+# Shortest Dubins path from a line and sector to a line and sector
+
 import numpy as np
 from shapely.geometry import Polygon
 from shapely.geometry import Point
@@ -12,17 +15,19 @@ import DubinsToPrlgrm as dpgm
 
 def Translate(refPt, pt2):
     # this tranlates teh refPt to origin, and the pt2 to the new position
-
     return np.array(pt2) - np.array(refPt)
 
 def RotateVec(vec, theta ):
     # rotates the vec in ccw direction for an angle of theta
-    
     rotMat = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
     return np.matmul(rotMat, np.array(vec))
 
 def TransformLinesToPrlGrm(line1, line2):
-    # This moves the first point of line1 to origin
+    # This function translates the line1 and line 2, 
+    # such that the starting position is (0,0) 
+    # and the final feasible set of positions is a paralellogram    
+    # output: paralellogram
+    # For any path from [0,0] to paralellogram, there exists a path from line1 to line2
     refPt = np.array(line1[0])
 
     line1_pt2_trans = np.array(line1[1])-refPt
@@ -34,6 +39,7 @@ def TransformLinesToPrlGrm(line1, line2):
 
 def LinesToPrlGrm(line1, line2):
     # This does not move the first point of line1 to origin
+    # Output is a paralellogram such that any path from line1[0] to paralellogram is same as line1 to line2
     line1 = np.array(line1)
     line2 = np.array(line2)
     delXY_line1 = line1[1]-line1[0]
@@ -46,6 +52,7 @@ def LinesToPrlGrm(line1, line2):
 def TransformRotate(angle1, line1, line2, sector2):
     # This function translates and rotate the line1 and line 2, 
     # such that the starting position is (0,0) and start heading is 0
+    # and the final feasible set of positions is a paralellogram
     prlGrm_rot = []
     prlGrm = TransformLinesToPrlGrm(line1, line2)
     sector2 = [sector2[0]-angle1, sector2[1]-angle1]
@@ -55,6 +62,11 @@ def TransformRotate(angle1, line1, line2, sector2):
     return prlGrm_rot, sector2
 
 def FindMinPositions(finalPos, line1, line2):
+
+    # inputs are original line1 and line2.
+    # finalPos is the final position of the dubins path starting from line1[0]
+    # The finalPos may not lie on line2, because that is the output of the point to pralellogram problem
+    # This function moves the final position and initial position such that they lie on the lines
 
     tol = 1e-6
     line1 = np.array(line1)
@@ -93,21 +105,24 @@ def FindMinPositions(finalPos, line1, line2):
     # plt.show()
 
     if prlgrm_poly.contains(Point(finalPos)):
-
         line1_ornt = np.arctan2(line1[1][1]-line1[0][1], line1[1][0]-line1[0][0])
         dist_prime = du.DistPtHdngToLineSeg(finalPos, line1_ornt, line2)
         posLine1 = line1[0] + dist_prime*np.array([np.cos(line1_ornt), np.sin(line1_ornt)])
         posLine2 = finalPos + dist_prime*np.array([np.cos(line1_ornt), np.sin(line1_ornt)])
         return posLine1, posLine2
 
-
     return posLine1, posLine2
 
 def DubinsLineToLine(line1, sector1, line2, sector2, rho):
     # inputs:
-    # prlgrm: list of vertices of the parallelogram in counterclock-wise order
-    # finHdng: final heading at any position inside paralellogram
+    # line1 and line2: list of two points, each point is a tuple, also can be np.array
+    # sector 1 and sector 2: tuples/arrays, each contains sector lower bound and upper bound (in that order)
     # rho: minimum turn radius
+    # outputs;
+    # minLength: shortest path length
+    # minConfStart, minConfGoal: configurations corresponding to shortest dubins path on line 1 and line 2
+    # minPathType: type of the shortest path, ex 'LSL', 'SR' etc.
+    # minPathSegLengths: length of each of the segments in the shortest path
 
     minLengthsList = []
     minConfigsList = [] # List of configs: tuple of 4 entries (sector1 heading, final configuration in the rotated system, type of Dubins path, list of lengths of each segment )

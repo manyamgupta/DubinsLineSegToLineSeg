@@ -1,3 +1,7 @@
+# Author: Satyanarayana Gupta Manyam
+# Shortest Dubins path to a paralellogram and given final heading
+# All functions here assumes start config is [0,0,0]
+
 import numpy as np
 from shapely.geometry import Polygon
 from shapely.geometry import Point
@@ -15,6 +19,7 @@ def DubinsToPrlgrm(prlGrm, finHdng, rho):
     # prlgrm: list of vertices of the parallelogram in counterclock-wise order
     # finHdng: final heading at any position inside paralellogram
     # rho: minimum turn radius
+    # Assumes start config is [0,0,0]
 
     minLength = np.nan
     finConf = [np.nan, np.nan, np.nan]

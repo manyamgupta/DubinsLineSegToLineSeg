@@ -1,5 +1,8 @@
-# Shortest Dubins LSR path to a line segment
-# Author: Satya Gupta Manyam
+# Author: Satyanarayana Gupta Manyam
+# Shortest Dubins path to a line segment
+# All functions here assumes start config is [0,0,0]
+# Local minimums are with respect to the lamda, parameter defining position on the line-segment
+
 import numpy as np
 from numpy import isfinite, pi,cos,sin
 import matplotlib.pyplot as plt
@@ -132,6 +135,7 @@ def LocalMinLR(lineSeg, rho):
     return finPt, finHdng, lengthsMinLR
 
 def LocalMinRL(lineSeg, rho):
+
     lineSeg_rfl = du.LineReflectionXaxis(lineSeg)
     finPt, finHdng, lengthLocalMinRL = LocalMinLR(lineSeg_rfl, rho)
 

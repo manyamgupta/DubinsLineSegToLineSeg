@@ -1,3 +1,4 @@
+# Author: Satyanarayana Gupta Manyam
 from numpy import pi,cos,sin
 import numpy as np
 import matplotlib.pyplot as plt
