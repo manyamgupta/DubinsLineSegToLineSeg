@@ -19,13 +19,6 @@ def PlotDubPathSegments(iniConf, pathMode, segLengths, rho, fmt):
 
     return
 
-def PlotParalellogram(prlGrm, fmt):
-    prlGrm.append(prlGrm[0])
-    for k in range(4):
-        utils.PlotLineSeg(prlGrm[k], prlGrm[k+1], fmt)
-    
-    return
-
 def PlotSegment(startConf, segLength, segType, rho, fmt):
 
     pt1 = startConf[0:2]
@@ -56,7 +49,13 @@ def PathTypeNum(ptype):
 
     typesList = ['L', 'R', 'S', 'LR', 'RL', 'LS', 'RS', 'SL', 'SR', 'LSL', 'RSR', 'LSR', 'RSL', 'LRL', 'RLR']
     return typesList.index(ptype)+1
-    
+
+def PathNumtoType(pnum):
+    # LSL =0; LSR = 1; RSL = 2; RSR = 3; RLR = 4; LRL = 5; 
+
+    typesList = ['LSL', 'LSR', 'RSL', 'RSR', 'RLR', 'LRL']
+
+    return typesList[pnum]
 
 def RotSenseSeq(pathMode):
 
@@ -82,6 +81,16 @@ def DistPtToLineSeg(pt, lineSeg):
     triangleArea = abs((B[0]-A[0])*(A[1]-pt[1]) - (B[1]-A[1])*(A[0]-pt[0]))
     
     return triangleArea/lenAB
+
+def DistPtHdngToLineSeg(pt, hdng, lineSeg):
+    # distance from point to linesegment along a given heading
+    lineSeg  =np.array(lineSeg)    
+    A = lineSeg[0]; B = lineSeg[1]
+    h = DistPtToLineSeg(pt, lineSeg) #perpendicual distance
+    hdng_perp = np.arctan2(B[1]-A[1], B[0]-A[0]) + np.pi/2
+    theta = hdng-hdng_perp
+
+    return h/np.cos(theta)
 
 def LengthOfLR(iniConf, finConf, rho):
         
@@ -126,6 +135,7 @@ def PtReflectionXaxis(pt):
 
 def CheckPtLiesOnLineSeg(pt, lineSeg):
 
+    lineSeg = np.array(lineSeg)
     if abs(np.linalg.norm(lineSeg[0]-pt)+np.linalg.norm(lineSeg[1]-pt) - np.linalg.norm(lineSeg[1]-lineSeg[0])) < 1e-6:
         return True
     else:

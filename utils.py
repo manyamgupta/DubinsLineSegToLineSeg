@@ -136,7 +136,7 @@ def PlotArc(C, r, phis,fmt):
 
 def PlotArrow(p1, hdng, arrLen, fmt):
 
-    p2 = p1 + arrLen*np.array([cos(hdng), sin(hdng)])
+    # p2 = p1 + arrLen*np.array([cos(hdng), sin(hdng)])
     dx = arrLen*np.cos(hdng)
     dy = arrLen*np.sin(hdng)
 
@@ -148,4 +148,11 @@ def PlotLineSeg(p1, p2, fmt):
 
     plt.plot([p1[0],p2[0]], [p1[1],p2[1]], color=fmt.color, linewidth=fmt.linewidth, linestyle=fmt.linestyle) 
 
+    return
+
+def PlotParalellogram(prlGrm, fmt):
+    prlGrm.append(prlGrm[0])
+    for k in range(4):
+        PlotLineSeg(prlGrm[k], prlGrm[k+1], fmt)
+    
     return

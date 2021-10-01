@@ -1,13 +1,14 @@
-import DubToLineSeg as dls
 import numpy as np
 from shapely.geometry import Polygon
 from shapely.geometry import Point
-import utils
-import dubutils as du
 from collections import namedtuple
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import time
+import utils
+import dubins
+import dubutils as du
+import DubToLineSeg as dls
 
 def DubinsToPrlgrm(prlGrm, finHdng, rho):
     # inputs:
@@ -129,6 +130,13 @@ def DubinsToPrlgrm(prlGrm, finHdng, rho):
             lengthsRLR = lengthsList[j]        
             lengthsVec.append(lengthsRLR[0])
             configsList.append(( (finPos[0], finPos[1], finHdng), 'RLR', lengthsRLR[1:4] ) )
+
+        # Shortest Dubins to vertices of the paralellogram
+
+        pathDub = dubins.shortest_path([0,0,0], [prlGrm[k][0], prlGrm[k][1], finHdng ], rho)
+        lengthsVec.append(pathDub.path_length())
+        configsList.append(( (prlGrm[k][0], prlGrm[k][1], finHdng ), du.PathNumtoType(pathDub.path_type()), [pathDub.segment_length(0), pathDub.segment_length(1), pathDub.segment_length(2)] ) )
+
     
     lengthsVec = np.array(lengthsVec)
     minLength = np.min(lengthsVec)
@@ -141,9 +149,10 @@ def DubinsToPrlgrm(prlGrm, finHdng, rho):
 if __name__ == "__main__":
 
     # prlGrm = [(-2,-1), (3,-1),(4,5),(-1,5)]
-    prlGrm = [(2,-1), (7,-1),(8,5),(3,5)]
+    # prlGrm = [(2,-1), (7,-1),(8,5),(3,5)]
+    prlGrm =  [(1,-1), (4,-1), (2,3), (-1,3) ]
 
-    finHdng =5
+    finHdng =0
     rho=1
     plotformat = namedtuple("plotformat","color linewidth linestyle marker")
 
@@ -152,9 +161,11 @@ if __name__ == "__main__":
     computation_time = time.time()-start
     print(f"{configsList=}")
     print(f"{lengthsVec=}")
+    print(f"{minLength=}")
+    print(f"{minConfig=}")
     print(f"{computation_time=}")
 
-    du.PlotParalellogram(prlGrm, plotformat('g',2,'-','x'))
+    utils.PlotParalellogram(prlGrm, plotformat('g',2,'-','x'))
     utils.PlotArrow([0,0],0,1, plotformat('c',2,'--','x'))
     du.PlotDubPathSegments([0,0,0],minConfig[1],minConfig[2],rho, plotformat('b',2,'-',''))
     plt.axis('equal')
@@ -162,11 +173,11 @@ if __name__ == "__main__":
     # cmap = mpl.cm.ScalarMappable(norm=norm, cmap=mpl.cm.Blues)
     # cmap.set_array([])
     plt.figure()
-
     for config in configsList:
-        du.PlotParalellogram(prlGrm, plotformat('g',2,'-','x'))
+        # plt.figure()
+        utils.PlotParalellogram(prlGrm, plotformat('g',2,'-','x'))
         utils.PlotArrow([0,0],0,1, plotformat('c',2,'--','x'))
-        plt.subplot(4, 4, du.PathTypeNum(config[1]))        
+        # plt.subplot(4, 4, du.PathTypeNum(config[1]))        
         du.PlotDubPathSegments([0,0,0],config[1],config[2],rho, plotformat(np.random.random(3),2,'--',''))
         plt.axis('equal')
     plt.show()
