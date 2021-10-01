@@ -60,19 +60,37 @@ def FindMinPositions(finalPos, line1, line2):
     line1 = np.array(line1)
     line2 = np.array(line2)
     delXY_line1 = line1[1]-line1[0]
+
+    line2_proj = [line2[0]-delXY_line1, line2[1]-delXY_line1]
     posLine1 = [np.nan, np.nan]
     posLine2 = [np.nan, np.nan]
-
-    for i in range(2):
-        delXY = line2[i]-finalPos
-        if (np.dot(delXY, delXY_line1)/np.linalg.norm(delXY)/np.linalg.norm(delXY_line1)>=1-tol and
-        np.dot(delXY, delXY_line1)/np.linalg.norm(delXY)/np.linalg.norm(delXY_line1)<=1+tol):
-            posLine2 = line2[i]
-            posLine1 = line1[0]+delXY
-            return posLine1, posLine2
+    # utils.PlotLineSeg(line2_proj[0], line2_proj[1], plotformat('g',2,'-',''))
+    if du.CheckPtLiesOnLineSeg(finalPos, line2):
+        posLine1 = line1[0]
+        posLine2 = finalPos
+        return posLine1, posLine2
+    elif du.CheckPtLiesOnLineSeg(finalPos, line2_proj):
+        posLine1 = line1[1]
+        posLine2 = finalPos+delXY_line1
+        return posLine1, posLine2
+    else:
+        for i in range(2):
+            delXY = line2[i]-finalPos
+            if (np.dot(delXY, delXY_line1)/np.linalg.norm(delXY)/np.linalg.norm(delXY_line1)>=1-tol and
+            np.dot(delXY, delXY_line1)/np.linalg.norm(delXY)/np.linalg.norm(delXY_line1)<=1+tol):
+                posLine2 = line2[i]
+                posLine1 = line1[0]+delXY
+                return posLine1, posLine2
 
     prlgrm = LinesToPrlGrm(line1, line2)
     prlgrm_poly = Polygon(prlgrm)
+
+    # print(f"{finalPos=}")
+    # utils.PlotLineSeg(line1[0], line1[1], plotformat('g',2,'-',''))
+    # utils.PlotLineSeg(line2[0], line2[1], plotformat('g',2,'-',''))
+    # utils.PlotParalellogram(prlgrm, plotformat('c',2,'--',''))
+    # plt.axis('equal')
+    # plt.show()
 
     if prlgrm_poly.contains(Point(finalPos)):
 
@@ -82,12 +100,6 @@ def FindMinPositions(finalPos, line1, line2):
         posLine2 = finalPos + dist_prime*np.array([np.cos(line1_ornt), np.sin(line1_ornt)])
         return posLine1, posLine2
 
-    # print(f"{finalPos=}")
-    # utils.PlotLineSeg(line1[0], line1[1], plotformat('g',2,'-',''))
-    # utils.PlotLineSeg(line2[0], line2[1], plotformat('g',2,'-',''))
-    # utils.PlotParalellogram(prlgrm, plotformat('c',2,'--',''))
-    # plt.axis('equal')
-    # plt.show()
 
     return posLine1, posLine2
 
@@ -189,16 +201,13 @@ def DubinsLineToLine(line1, sector1, line2, sector2, rho):
     finalPos_revRotd = RotateVec([minConfig[1][0], minConfig[1][1] ], minConfig[0] )
     finalHdng_revRotd = minConfig[1][2] + minConfig[0]
     finalPos_moved = finalPos_revRotd + line1[0]
+        
+    posLine1, posLine2 = FindMinPositions(finalPos_moved, line1, line2)
+        
+    minConfStart = [posLine1[0], posLine1[1], minConfig[0]]
+    minConfGoal = [posLine2[0], posLine2[1], finalHdng_revRotd]
 
-    if du.CheckPtLiesOnLineSeg(finalPos_moved, line2):
-        minConfStart = [line1[0][0], line1[0][1], minConfig[0]]
-        minConfGoal = [finalPos_moved[0], finalPos_moved[1], finalHdng_revRotd]
-    else:
-        posLine1, posLine2 = FindMinPositions(finalPos_moved, line1, line2)
-        minConfStart = [posLine1[0], posLine1[1], minConfig[0]]
-        minConfGoal = [posLine2[0], posLine2[1], finalHdng_revRotd]
-
-    # Moving to the oringinal origin
+    
     # print(f"{finalPos_revRotd=}")
     # print(f"{finalHdng_revRotd=}")
 
@@ -217,15 +226,14 @@ def DubinsLineToLine(line1, sector1, line2, sector2, rho):
     # plt.show()
 
     return minLength, minConfStart, minConfGoal, minPathType, minPathSegLengths
-    # return minLength, finConf, pathType
-
+    
 if __name__ == "__main__":
     plotformat = namedtuple("plotformat","color linewidth linestyle marker")
 
-    line1 = [(1,2), (5,5)]
-    line2 = [(1,5), (-2,0)]
+    line1 = [(5,5), (1,2)]
+    line2 = [(-2,0), (1,5)]
     sector1 = [-np.pi/2-.5, -np.pi/4]
-    sector2 = [np.pi/4, np.pi/2]
+    sector2 = [np.pi/4, np.pi/2+1.2]
     rho = 1
 
     start = time.time()
