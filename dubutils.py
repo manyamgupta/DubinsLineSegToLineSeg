@@ -88,6 +88,10 @@ def DistPtHdngToLineSeg(pt, hdng, lineSeg):
     # distance from point to linesegment along a given heading
     lineSeg  =np.array(lineSeg)    
     A = lineSeg[0]; B = lineSeg[1]
+    PB = B-pt; PA = A-pt
+    if np.cross(PB,PA)<0:
+        B = lineSeg[0]; A = lineSeg[1]
+
     h = DistPtToLineSeg(pt, lineSeg) #perpendicual distance
     hdng_perp = np.arctan2(B[1]-A[1], B[0]-A[0]) + np.pi/2
     theta = hdng-hdng_perp

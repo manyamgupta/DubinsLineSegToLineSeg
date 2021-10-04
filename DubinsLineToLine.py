@@ -235,23 +235,24 @@ def DubinsLineToLine(line1, sector1, line2, sector2, rho):
         minConfGoal = [posLine2[0], posLine2[1], finalHdng_revRotd]
 
     
-    # print(f"{finalPos_revRotd=}")
-    # print(f"{finalHdng_revRotd=}")
+    print(f"{finalPos_revRotd=}")
+    print(f"{finalHdng_revRotd=}")
+    print(f"{finalPos_moved=}")
 
     # prlGrm = TransformLinesToPrlGrm(line1, line2)
     # prlGrm_moved = [prlGrm[0]+line1[0], prlGrm[1]+line1[0], prlGrm[2]+line1[0], prlGrm[3]+line1[0]]
     # plt.figure()
     # utils.PlotLineSeg(line1[0], line1[1], plotformat('b',2,'--',''))
     # utils.PlotLineSeg(line2[0], line2[1], plotformat('b',2,'--',''))
-    # # utils.PlotParalellogram(prlGrm_moved, plotformat('g',2,'--','x'))
-    # utils.PlotParalellogram(prlGrm, plotformat('g',2,'--','x'))
+    # utils.PlotParalellogram(prlGrm_moved, plotformat('g',2,'--','x'))
+    # # utils.PlotParalellogram(prlGrm, plotformat('g',2,'--','x'))
     # utils.PlotArrow([0,0], 0, 1, plotformat('c',2,'--','x'))
 
     # utils.PlotParalellogram(prlGrm, plotformat('m',2,'--','x'))
-    # du.PlotDubPathSegments([line1[0][0], line1[0][1], minConfig[0]], minConfig[2], minConfig[3],rho, plotformat('b',2,'-',''))
-    # du.PlotDubPathSegments(minConfStart, minConfig[2], minConfig[3],rho, plotformat('b',2,'-',''))
-    # utils.PlotArrow(minConfStart[0:2], minConfStart[2], 1, plotformat('c',2,'--','x'))
-    # utils.PlotArrow(minConfGoal[0:2], minConfGoal[2], 1, plotformat('c',2,'--','x'))
+    # # du.PlotDubPathSegments([line1[0][0], line1[0][1], minConfig[0]], minConfig[2], minConfig[3],rho, plotformat('b',2,'-',''))
+    # # du.PlotDubPathSegments(minConfStart, minConfig[2], minConfig[3],rho, plotformat('b',2,'-',''))
+    # # utils.PlotArrow(minConfStart[0:2], minConfStart[2], 1, plotformat('c',2,'--','x'))
+    # # utils.PlotArrow(minConfGoal[0:2], minConfGoal[2], 1, plotformat('c',2,'--','x'))
     # plt.axis('equal')
     # plt.show()
 
@@ -293,10 +294,10 @@ def DubLineToLineNum(line1, sector1, line2, sector2, rho):
 if __name__ == "__main__":
     plotformat = namedtuple("plotformat","color linewidth linestyle marker")
 
-    line1 = [(1,2), (3,3)]
+    line1 = [(1,2), (4,4)]
     line2 = [(6,-4.), (3,6)]
-    sector1 = [-.5, .25]
-    sector2 = [-.25, .75 ]
+    sector1 = [-1, -.5]
+    sector2 = [1.1, 3 ]
     rho = 1
 
     start = time.time()
