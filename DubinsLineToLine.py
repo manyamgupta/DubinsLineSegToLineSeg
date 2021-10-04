@@ -2,6 +2,7 @@
 # Shortest Dubins path from a line and sector to a line and sector
 
 import numpy as np
+from numpy.lib.shape_base import expand_dims
 from shapely.geometry import Polygon
 from shapely.geometry import Point
 from collections import namedtuple
@@ -204,6 +205,14 @@ def DubinsLineToLine(line1, sector1, line2, sector2, rho):
                 if utils.InInt(sector2_rot[0], sector2_rot[1], finHdng ):
                     minLengthsList.append(lengthsMin[0])
                     minConfigsList.append( (sector1[i], (finPt[0], finPt[1], finHdng), 'SR', lengthsMin[1:3] ) )
+            if i==0:
+                # This does not depend on the rotation, and needs to be computed only once
+                #S local minimum
+                finPt, finHdng, lengthS = dls.LocalMinS(lineSeg, rho)
+                if np.isfinite(lengthS):
+                    if utils.InInt(sector2_rot[0], sector2_rot[1], finHdng) and utils.InInt(0, sector1[1]-sector1[0], finHdng):
+                        minLengthsList.append(lengthS)
+                        minConfigsList.append( (sector1[0], (finPt[0], finPt[1], finHdng), 'S', [lengthS] ) )
 
     minLengthsVec = np.array(minLengthsList)
     minLength = np.min(minLengthsVec)
@@ -218,9 +227,12 @@ def DubinsLineToLine(line1, sector1, line2, sector2, rho):
     finalPos_moved = finalPos_revRotd + line1[0]
         
     posLine1, posLine2 = FindMinPositions(finalPos_moved, line1, line2)
-        
-    minConfStart = [posLine1[0], posLine1[1], minConfig[0]]
-    minConfGoal = [posLine2[0], posLine2[1], finalHdng_revRotd]
+    if minConfig[2] == 'S':
+        minConfStart = [posLine1[0], posLine1[1], finalHdng_revRotd]
+        minConfGoal = [posLine2[0], posLine2[1], finalHdng_revRotd]
+    else:
+        minConfStart = [posLine1[0], posLine1[1], minConfig[0]]
+        minConfGoal = [posLine2[0], posLine2[1], finalHdng_revRotd]
 
     
     # print(f"{finalPos_revRotd=}")
@@ -231,10 +243,13 @@ def DubinsLineToLine(line1, sector1, line2, sector2, rho):
     # plt.figure()
     # utils.PlotLineSeg(line1[0], line1[1], plotformat('b',2,'--',''))
     # utils.PlotLineSeg(line2[0], line2[1], plotformat('b',2,'--',''))
-    # utils.PlotParalellogram(prlGrm_moved, plotformat('g',2,'--','x'))
-    # # utils.PlotParalellogram(prlGrm, plotformat('m',2,'--','x'))
+    # # utils.PlotParalellogram(prlGrm_moved, plotformat('g',2,'--','x'))
+    # utils.PlotParalellogram(prlGrm, plotformat('g',2,'--','x'))
+    # utils.PlotArrow([0,0], 0, 1, plotformat('c',2,'--','x'))
+
+    # utils.PlotParalellogram(prlGrm, plotformat('m',2,'--','x'))
     # du.PlotDubPathSegments([line1[0][0], line1[0][1], minConfig[0]], minConfig[2], minConfig[3],rho, plotformat('b',2,'-',''))
-    # # du.PlotDubPathSegments(minConfStart, minConfig[2], minConfig[3],rho, plotformat('b',2,'-',''))
+    # du.PlotDubPathSegments(minConfStart, minConfig[2], minConfig[3],rho, plotformat('b',2,'-',''))
     # utils.PlotArrow(minConfStart[0:2], minConfStart[2], 1, plotformat('c',2,'--','x'))
     # utils.PlotArrow(minConfGoal[0:2], minConfGoal[2], 1, plotformat('c',2,'--','x'))
     # plt.axis('equal')
@@ -242,24 +257,65 @@ def DubinsLineToLine(line1, sector1, line2, sector2, rho):
 
     return minLength, minConfStart, minConfGoal, minPathType, minPathSegLengths
     
+def DubLineToLineNum(line1, sector1, line2, sector2, rho):
+
+    discs = 31
+    line1 = np.array(line1)
+    line2 = np.array(line2)
+    lengthVec = np.zeros(discs**4)
+    configsVec = np.zeros([discs**4,6])
+    indx = 0
+    for i in range(discs):
+        for j in range(discs):
+            for k in range(discs):
+                for l in range(discs):
+
+                    lam1 = i/(discs-1)
+                    lam2 = j/(discs-1)
+                    lam3 = k/(discs-1)
+                    lam4 = l/(discs-1)
+
+                    p1 = (1-lam1)*line1[0]+lam1*line1[1]
+                    t1 = (1-lam2)*sector1[0]+lam2*sector1[1]
+                    p2 = (1-lam3)*line2[0]+lam3*line2[1]
+                    t2 = (1-lam4)*sector2[0]+lam4*sector2[1]
+                    dubPath = dubins.shortest_path([p1[0],p1[1],t1], [p2[0],p2[1],t2], rho)
+                    length = dubPath.path_length()
+                    lengthVec[indx] = length
+                    configsVec[indx, :] = [p1[0],p1[1],t1, p2[0],p2[1],t2]
+                    indx += 1
+    minLength = np.min(lengthVec)
+    minIndx = np.argmin(lengthVec)
+    minConfigs = configsVec[minIndx]
+    return minLength, minConfigs
+
+    
 if __name__ == "__main__":
     plotformat = namedtuple("plotformat","color linewidth linestyle marker")
 
-    line1 = [(5,5), (1,2)]
-    line2 = [(-2,0), (1,5)]
-    sector1 = [-np.pi/2-.5, -np.pi/4]
-    sector2 = [np.pi/4, np.pi/2+1.2]
+    line1 = [(1,2), (3,3)]
+    line2 = [(6,-4.), (3,6)]
+    sector1 = [-.5, .25]
+    sector2 = [-.25, .75 ]
     rho = 1
 
     start = time.time()
     minLength, minConfStart, minConfGoal, minPathType, minPathSegLengths = DubinsLineToLine(line1, sector1, line2, sector2, rho)
     computation_time = time.time()-start
-
     print(f"{minLength=}")
     print(f"{minConfStart=}")
     print(f"{minConfGoal=}")
     print(f"{minPathType=}")
     print(f"{computation_time=}")
+
+    # start = time.time()
+    # minLengthNum, minConfigsNum = DubLineToLineNum(line1, sector1, line2, sector2, rho)
+    # computation_time_num = time.time()-start
+    # print(f"{minLengthNum=}")
+    # print(f"{minConfigsNum=}")
+    # print(f"{computation_time_num=}")
+
+    
 
     plt.figure()
     utils.PlotLineSeg(line1[0], line1[1], plotformat('g',2,'-',''))
@@ -269,9 +325,10 @@ if __name__ == "__main__":
     utils.PlotArrow(line2[0], sector2[0], 1, plotformat('c',2,'-','x'))
     utils.PlotArrow(line2[0], sector2[1], 1, plotformat('c',2,'-','x'))
     
-    du.PlotDubPathSegments(minConfStart, minPathType, minPathSegLengths,rho, plotformat('b',2,'-',''))
-    utils.PlotArrow(minConfStart[0:2], minConfStart[2], 1, plotformat('m',2,'dotted','x'))
-    utils.PlotArrow(minConfGoal[0:2], minConfGoal[2], 1, plotformat('m',2,'dotted','x'))
+    if minPathType != 'None':
+        du.PlotDubPathSegments(minConfStart, minPathType, minPathSegLengths,rho, plotformat('b',2,'-',''))
+        utils.PlotArrow(minConfStart[0:2], minConfStart[2], 1, plotformat('m',2,'dotted','x'))
+        utils.PlotArrow(minConfGoal[0:2], minConfGoal[2], 1, plotformat('m',2,'dotted','x'))
 
     plt.axis('equal')
 

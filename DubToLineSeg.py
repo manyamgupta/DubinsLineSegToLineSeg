@@ -23,17 +23,36 @@ def PathRtoFinHdng(finHdng, rho):
     finPos = np.array([-rho*sin(finHdng),-rho+rho*cos(finHdng)])
     return finPos, lengthR
 
-def PathStoFinHdng(lineSeg, finHdng ):
+def LocalMinS(lineSeg, rho):
+    A = lineSeg[0]; B = lineSeg[1]
+    finPt = np.array([np.nan, np.nan])
+    finHdng = np.nan
+    lengthS = np.nan
+    
+    vx = B[0]-A[0]
+    vy = B[1]-A[1]
+    lam = -(A[0]*vx+A[1]*vy)/(vx*vx+vy*vy)
+    if lam>=0 and lam <=1:
+        finPt = (1-lam)*lineSeg[0]+ lam*lineSeg[1]
+        finHdng = np.mod(np.arctan2(finPt[1], finPt[0]), 2*np.pi)
+        lengthS = np.linalg.norm(finPt)
+
+    return finPt, finHdng, lengthS
+
+def PathStoLine(lineSeg, finHdng ):
     finPos = [np.nan, np.nan]
     lengthS = np.nan
     if np.abs(finHdng) < 1e-6:
-        finHdng = 0
         A = lineSeg[0]; B = lineSeg[1]
         if A[1]*B[1]<=0:
             lam = A[1]/(A[1]-B[1])
             if lam>=0 and lam<=1:
                 lengthS = (1-lam)*A[0]+lam*B[0]
-                finPos = [lengthS,0]
+                if lengthS >= 0:
+                    finPos = [lengthS,0]
+                else: 
+                    lengthS = np.nan
+           
     return finPos, lengthS
 
 def LtoLine(lineSeg, rho):    
@@ -441,28 +460,48 @@ if __name__ == "__main__":
     ############################# Test LR Min #############################
     # lineSeg = np.array([ (2,-1), (-2,3)])
     
-    lineSeg = np.array([ (0,-2), (1,5)] )
+    # lineSeg = np.array([ (0,-2), (1,5)] )
 
-    finPt, finHdng, lengths = LocalMinLR(lineSeg, rho)
+    # finPt, finHdng, lengths = LocalMinLR(lineSeg, rho)
+    
+    # C1 = np.array([0,rho])
+    
+    # if np.isfinite(lengths[0]):
+    #     utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'--',''))
+    #     utils.PlotCircle(np.array([0,rho]), rho,plotformat('g',2,'--',''))
+        
+    #     du.PlotDubPathSegments(iniConf, 'LR', lengths[1:3], rho, plotformat('b',2,'-',''))
+        
+    #     # center2 = finPt + rho*np.array([sin(finHdng), -cos(finHdng)])
+    #     C2 = finPt + rho*np.array([cos(finHdng-pi/2), sin(finHdng-pi/2)])
+    #     utils.PlotCircle(C2, rho,plotformat('g',2,'--',''))
+    #     utils.PlotArrow(finPt, finHdng, 1, plotformat('m',2,'--',''))
+        
+    #     P1 = (C1+C2)*.5
+    #     utils.PlotLineSeg(P1, finPt, plotformat('g',2,'-','x'))
+    #     plt.axis('equal')
+    #     plt.show()
+
+    ############################# Test S Min #############################
+    
+    # lineSeg = np.array([(2,1), (1,-2)] )
+    lineSeg = np.array([[-1.1480503 ,  2.7716386 ], [ 5.45042262, -5.31910643]])
+
+    finPt, finHdng, lengthL = LocalMinS(lineSeg, rho)
+    print(f"{finPt=}")
+    print(f"{finHdng=}")
     
     C1 = np.array([0,rho])
     
-    if np.isfinite(lengths[0]):
+    if np.isfinite(lengthL):
         utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'--',''))
-        utils.PlotCircle(np.array([0,rho]), rho,plotformat('g',2,'--',''))
+        utils.PlotLineSeg([0,0], finPt, plotformat('b',2,'-',''))
         
-        du.PlotDubPathSegments(iniConf, 'LR', lengths[1:3], rho, plotformat('b',2,'-',''))
-        
-        # center2 = finPt + rho*np.array([sin(finHdng), -cos(finHdng)])
-        C2 = finPt + rho*np.array([cos(finHdng-pi/2), sin(finHdng-pi/2)])
-        utils.PlotCircle(C2, rho,plotformat('g',2,'--',''))
         utils.PlotArrow(finPt, finHdng, 1, plotformat('m',2,'--',''))
-        
-        P1 = (C1+C2)*.5
-        utils.PlotLineSeg(P1, finPt, plotformat('g',2,'-','x'))
+
         plt.axis('equal')
         plt.show()
-    
+
      ############################ Test LS Min #############################
     
     # lineSeg = np.array([(-2,3), (-3,-2)])

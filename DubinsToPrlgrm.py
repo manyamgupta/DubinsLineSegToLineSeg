@@ -51,7 +51,7 @@ def DubinsToPrlgrm(prlGrm, finHdng, rho):
         lineSeg = np.array([prlGrm[k], prlGrm[k+1]])
 
         # Path Type S to any point on paralellogram edges with given final heading
-        finPos, lengthS = dls.PathStoFinHdng(lineSeg, finHdng )
+        finPos, lengthS = dls.PathStoLine(lineSeg, finHdng )
         if np.isfinite(finPos[0]):
             lengthsVec.append(lengthS)
             configsList.append(( (finPos[0], finPos[1], finHdng), 'S', [lengthS] ) )
