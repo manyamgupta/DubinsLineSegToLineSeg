@@ -235,9 +235,9 @@ def DubinsLineToLine(line1, sector1, line2, sector2, rho):
         minConfGoal = [posLine2[0], posLine2[1], finalHdng_revRotd]
 
     
-    print(f"{finalPos_revRotd=}")
-    print(f"{finalHdng_revRotd=}")
-    print(f"{finalPos_moved=}")
+    # print(f"{finalPos_revRotd=}")
+    # print(f"{finalHdng_revRotd=}")
+    # print(f"{finalPos_moved=}")
 
     # prlGrm = TransformLinesToPrlGrm(line1, line2)
     # prlGrm_moved = [prlGrm[0]+line1[0], prlGrm[1]+line1[0], prlGrm[2]+line1[0], prlGrm[3]+line1[0]]
@@ -294,10 +294,10 @@ def DubLineToLineNum(line1, sector1, line2, sector2, rho):
 if __name__ == "__main__":
     plotformat = namedtuple("plotformat","color linewidth linestyle marker")
 
-    line1 = [(1,2), (4,4)]
-    line2 = [(6,-4.), (3,6)]
-    sector1 = [-1, -.5]
-    sector2 = [1.1, 3 ]
+    line1 = [(0,0), (5,0)]
+    line2 = [(1,-2), (4,3)]
+    sector1 = [.5, .75]
+    sector2 = [2, 3]
     rho = 1
 
     start = time.time()
