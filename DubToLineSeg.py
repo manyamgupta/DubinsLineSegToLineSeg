@@ -158,8 +158,9 @@ def LocalMinRL(lineSeg, rho):
     lineSeg_rfl = du.LineReflectionXaxis(lineSeg)
     finPt, finHdng, lengthLocalMinRL = LocalMinLR(lineSeg_rfl, rho)
 
-    finPt = du.PtReflectionXaxis(finPt)
-    finHdng = np.mod(-finHdng,pi)
+    if np.isfinite(finPt[0]):
+        finPt = du.PtReflectionXaxis(finPt)
+        finHdng = np.mod(-finHdng,np.pi)
 
     return finPt, finHdng, lengthLocalMinRL 
 
@@ -212,26 +213,32 @@ def LocalMinRS(lineSeg, rho):
     lineSeg_rfl = du.LineReflectionXaxis(lineSeg)
     finPos, finHdng, minLenRS = LocalMinLS(lineSeg_rfl, rho)
     
-    finPos = du.PtReflectionXaxis(finPos)
-    finHdng = np.mod(-finHdng, 2*np.pi)
+    if np.isfinite(finPos[0]):
+        finPos = du.PtReflectionXaxis(finPos)
+        finHdng = np.mod(-finHdng, 2*np.pi)
+
     return finPos, finHdng, minLenRS
 
 def SLtoLine(lineSeg, finHdng, rho):
     A = lineSeg[0]; B = lineSeg[1]
     finHdng = np.mod(finHdng, 2*np.pi)
-    C = np.array([0,rho])
-    crossprodCACB = np.cross(A-C, B-C)
-    if crossprodCACB > 0:
+   
+    crossprodOAOB = np.cross(A, B)
+    if crossprodOAOB > 0:
         A = lineSeg[1]; B = lineSeg[0]
+    lengthsSL = [np.nan, np.nan, np.nan]
+    finPos = [np.nan, np.nan]
+    if (B[1]-A[1]) != 0:
+        lam = (rho-rho*cos(finHdng)-A[1])/(B[1]-A[1])
+        ls = A[0]+lam*(B[0]-A[0])-rho*sin(finHdng)
+        if lam>=0 and lam <=1 and ls>0:
+            finPos = (1-lam)*A + lam*B        
+            lengthsSL = [ls+rho*finHdng, ls, rho*finHdng]
         
-    lam = (rho-rho*cos(finHdng)-A[1])/(B[1]-A[1])
-    ls = A[0]+lam*(B[0]-A[0])-rho*sin(finHdng)
-    if lam>=0 and lam <=1 and ls>0:
-        finPos = (1-lam)*A + lam*B        
-        lengthsSL = [ls+rho*finHdng, ls, rho*finHdng]
     else:
-        lengthsSL = [np.nan, np.nan, np.nan]
-        finPos = [np.nan, np.nan]
+        if A[1]>0 and A[1]< 2*rho:
+            print("To Do: SL to horizontal line")
+
     return finPos, lengthsSL
 
 def SRtoLine(lineSeg, finHdng, rho):
@@ -251,14 +258,44 @@ def LocalMinSL(lineSeg, rho):
     finPos, minlengthsSL = SLtoLine(lineSeg, finHdng, rho)
     return finPos, finHdng, minlengthsSL
 
+def LocalMinSL2(lineSeg, finHdng, rho):
+# Local minimum for given final heading, and the initial heading can vary
+#  This occurs when 'S' segment is perpendicular to linesegment
+    A = lineSeg[0]; B = lineSeg[1]
+    crossprodCACB = np.cross(A, B)
+    if crossprodCACB > 0:
+        A = lineSeg[1]; B = lineSeg[0]
+    gamma = np.arctan2(B[1]-A[1], B[0]-A[0])
+
+    Ar = utils.RotateVec(A, -gamma+3*np.pi/2)
+    Br = utils.RotateVec(B, -gamma+3*np.pi/2)
+    finHdng_rot = finHdng-(gamma-3*np.pi/2)
+    finPos_rot, minlengthsSL = SLtoLine([Ar, Br], finHdng_rot, rho)
+
+    finPos = utils.RotateVec(finPos_rot, gamma-3*np.pi/2)
+    iniHdng = np.mod(gamma-3*np.pi/2, 2*np.pi)
+
+    return finPos, iniHdng, minlengthsSL
+
 def LocalMinSR(lineSeg, rho):
 
     lineSeg_rfl = du.LineReflectionXaxis(lineSeg)
     finPos, finHdng, minLenSR = LocalMinSL(lineSeg_rfl, rho)
     
-    finPos = du.PtReflectionXaxis(finPos)
-    finHdng = np.mod(-finHdng, 2*np.pi)
+    if np.isfinite(finPos[0]):
+        finPos = du.PtReflectionXaxis(finPos)
+        finHdng = np.mod(-finHdng, 2*np.pi)
     return finPos, finHdng, minLenSR
+
+def LocalMinSR2(lineSeg, finHdng, rho):
+
+    lineSeg_rfl = du.LineReflectionXaxis(lineSeg)
+    finHdng_rfl = -finHdng
+    finPos, iniHdng, minLenSR = LocalMinSL2(lineSeg_rfl, finHdng_rfl, rho)
+    if np.isfinite(finPos[0]):
+        finPos = du.PtReflectionXaxis(finPos)
+        iniHdng = np.mod(-iniHdng, 2*np.pi)
+    return finPos, iniHdng, minLenSR
 
 def LocalMinLSL(lineSeg, finHdng, rho):
 
@@ -458,49 +495,49 @@ if __name__ == "__main__":
     # plt.show()
 
     ############################# Test LR Min #############################
-    # lineSeg = np.array([ (2,-1), (-2,3)])
+    lineSeg = np.array([ (2,-1), (-2,3)])
     
-    # lineSeg = np.array([ (0,-2), (1,5)] )
+    lineSeg = np.array([ (0.5,-2), (1,5)] )
 
-    # finPt, finHdng, lengths = LocalMinLR(lineSeg, rho)
-    
-    # C1 = np.array([0,rho])
-    
-    # if np.isfinite(lengths[0]):
-    #     utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'--',''))
-    #     utils.PlotCircle(np.array([0,rho]), rho,plotformat('g',2,'--',''))
-        
-    #     du.PlotDubPathSegments(iniConf, 'LR', lengths[1:3], rho, plotformat('b',2,'-',''))
-        
-    #     # center2 = finPt + rho*np.array([sin(finHdng), -cos(finHdng)])
-    #     C2 = finPt + rho*np.array([cos(finHdng-pi/2), sin(finHdng-pi/2)])
-    #     utils.PlotCircle(C2, rho,plotformat('g',2,'--',''))
-    #     utils.PlotArrow(finPt, finHdng, 1, plotformat('m',2,'--',''))
-        
-    #     P1 = (C1+C2)*.5
-    #     utils.PlotLineSeg(P1, finPt, plotformat('g',2,'-','x'))
-    #     plt.axis('equal')
-    #     plt.show()
-
-    ############################# Test S Min #############################
-    
-    # lineSeg = np.array([(2,1), (1,-2)] )
-    lineSeg = np.array([[-1.1480503 ,  2.7716386 ], [ 5.45042262, -5.31910643]])
-
-    finPt, finHdng, lengthL = LocalMinS(lineSeg, rho)
-    print(f"{finPt=}")
-    print(f"{finHdng=}")
+    finPt, finHdng, lengths = LocalMinLR(lineSeg, rho)
     
     C1 = np.array([0,rho])
     
-    if np.isfinite(lengthL):
+    if np.isfinite(lengths[0]):
         utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'--',''))
-        utils.PlotLineSeg([0,0], finPt, plotformat('b',2,'-',''))
+        utils.PlotCircle(np.array([0,rho]), rho,plotformat('g',2,'--',''))
         
+        du.PlotDubPathSegments(iniConf, 'LR', lengths[1:3], rho, plotformat('b',2,'-',''))
+        
+        # center2 = finPt + rho*np.array([sin(finHdng), -cos(finHdng)])
+        C2 = finPt + rho*np.array([cos(finHdng-pi/2), sin(finHdng-pi/2)])
+        utils.PlotCircle(C2, rho,plotformat('g',2,'--',''))
         utils.PlotArrow(finPt, finHdng, 1, plotformat('m',2,'--',''))
-
+        
+        P1 = (C1+C2)*.5
+        utils.PlotLineSeg(P1, finPt, plotformat('g',2,'-','x'))
         plt.axis('equal')
         plt.show()
+
+    ############################# Test S Min #############################
+    
+    # # lineSeg = np.array([(2,1), (1,-2)] )
+    # lineSeg = np.array([[-1.1480503 ,  2.7716386 ], [ 5.45042262, -5.31910643]])
+
+    # finPt, finHdng, lengthL = LocalMinS(lineSeg, rho)
+    # print(f"{finPt=}")
+    # print(f"{finHdng=}")
+    
+    # C1 = np.array([0,rho])
+    
+    # if np.isfinite(lengthL):
+    #     utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'--',''))
+    #     utils.PlotLineSeg([0,0], finPt, plotformat('b',2,'-',''))
+        
+    #     utils.PlotArrow(finPt, finHdng, 1, plotformat('m',2,'--',''))
+
+    #     plt.axis('equal')
+    #     plt.show()
 
      ############################ Test LS Min #############################
     
@@ -538,6 +575,7 @@ if __name__ == "__main__":
      ############################ Test SL Min #############################
     
     # lineSeg = np.array([ (-1,2), (4,1.9)])
+
     # finPos, finHdng, minLenSL = LocalMinSL(lineSeg, rho)
     
     # utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'-',''))
@@ -548,6 +586,20 @@ if __name__ == "__main__":
     #     utils.PlotArrow(finPos, finHdng, 1, plotformat('m',2,'--',''))
     #     print('Min Length SL: ',minLenSL[0])
     #     print(f"{finHdng=}")
+
+    # plt.axis('equal')
+    # plt.show()  
+
+    # lineSeg = np.array([(4,-4), (5,1)])
+    # finHdng = 1
+    # finPos, iniHdng, minLenSL = LocalMinSL2(lineSeg, finHdng, rho)
+
+    # utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'-',''))
+    # if np.isfinite(finPos[0]):
+    #     du.PlotDubPathSegments([0,0,iniHdng], 'SL', minLenSL[1:3], rho, plotformat('b',2,'-',''))
+    #     utils.PlotArrow(finPos, finHdng, 1, plotformat('m',2,'--',''))
+    #     print('Min Length SL: ',minLenSL[0])
+    #     print(f"{iniHdng=}")
 
     # plt.axis('equal')
     # plt.show()  
@@ -568,6 +620,21 @@ if __name__ == "__main__":
 
     # plt.axis('equal')
     # plt.show() 
+
+
+    # lineSeg = np.array([ (-2, 3), (-1,-4)])
+    # finHdng = 4
+    # finPos, iniHdng, minLenSR = LocalMinSR2(lineSeg, finHdng, rho)
+    
+    # utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'-',''))
+    # if np.isfinite(finPos[0]):
+    #     du.PlotDubPathSegments([0,0,iniHdng], 'SR', minLenSR[1:3], rho, plotformat('b',2,'-',''))
+    #     utils.PlotArrow(finPos, finHdng, 1, plotformat('m',2,'--',''))
+    #     print('Min Length SR: ',minLenSR[0])
+    #     print(f"{iniHdng=}")
+
+    # plt.axis('equal')
+    # plt.show()
 
     ############################# Test RL #############################
 

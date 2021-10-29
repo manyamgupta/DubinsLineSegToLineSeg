@@ -259,7 +259,8 @@ def DubinsLineToLine(line1, sector1, line2, sector2, rho):
     return minLength, minConfStart, minConfGoal, minPathType, minPathSegLengths
     
 def DubLineToLineNum(line1, sector1, line2, sector2, rho):
-
+    # Numerically discretize and compute line-sector to line-sector shortest Dubins path
+    
     discs = 31
     line1 = np.array(line1)
     line2 = np.array(line2)

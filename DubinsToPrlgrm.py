@@ -14,7 +14,7 @@ import dubins
 import dubutils as du
 import DubToLineSeg as dls
 
-def DubinsToPrlgrm(prlGrm, finHdng, rho):
+def DubinsToPrlgrm(prlGrm, finHdng, rho, pathType='Dubins'):
     # inputs:
     # prlgrm: list of vertices of the parallelogram in counterclock-wise order
     # finHdng: final heading at any position inside paralellogram
@@ -22,134 +22,155 @@ def DubinsToPrlgrm(prlGrm, finHdng, rho):
     # Assumes start config is [0,0,0]
 
     minLength = np.nan
-    finConf = [np.nan, np.nan, np.nan]
-    pathType = 'Dubins'
     prlgrmPoly = Polygon(prlGrm)
     prlGrm.append(prlGrm[0])
     lengthsVec = []
     configsList = []
 
-    if prlgrmPoly.contains(Point(0,0)) and np.abs(finHdng)<=1e-8:
-        lengthsVec.append(0)
-        configsList.append(( (0,0,0), 'None', [0] ) )
+    if pathType == 'S' or pathType =='Dubins':
+        if prlgrmPoly.contains(Point(0,0)) and np.abs(finHdng)<=1e-8:
+            lengthsVec.append(0)
+            configsList.append(( (0,0,0), 'None', [0] ) )
 
 
     # Path Type L to any point with given final heading
-    finPos, lengthL = dls.PathLtoFinHdng(finHdng, rho)
-    if prlgrmPoly.contains(Point(finPos)):
-        lengthsVec.append(lengthL)
-        configsList.append(( (finPos[0], finPos[1], finHdng), 'L', [lengthL] ) )
+    if pathType == 'L' or pathType =='Dubins':
+        finPos, lengthL = dls.PathLtoFinHdng(finHdng, rho)
+        if prlgrmPoly.contains(Point(finPos)):
+            lengthsVec.append(lengthL)
+            configsList.append(( (finPos[0], finPos[1], finHdng), 'L', [lengthL] ) )
     
     # Path Type R to any point with given final heading
-    finPos, lengthR = dls.PathRtoFinHdng(finHdng, rho)    
-    if prlgrmPoly.contains(Point(finPos)):
-        lengthsVec.append(lengthR)
-        configsList.append(( (finPos[0], finPos[1], finHdng), 'R', [lengthR] ) )
+    if pathType == 'R' or pathType =='Dubins':
+        finPos, lengthR = dls.PathRtoFinHdng(finHdng, rho)    
+        if prlgrmPoly.contains(Point(finPos)):
+            lengthsVec.append(lengthR)
+            configsList.append(( (finPos[0], finPos[1], finHdng), 'R', [lengthR] ) )
 
     for k in range(4):
                 
         lineSeg = np.array([prlGrm[k], prlGrm[k+1]])
 
         # Path Type S to any point on paralellogram edges with given final heading
-        finPos, lengthS = dls.PathStoLine(lineSeg, finHdng )
-        if np.isfinite(finPos[0]):
-            lengthsVec.append(lengthS)
-            configsList.append(( (finPos[0], finPos[1], finHdng), 'S', [lengthS] ) )
+        if pathType == 'S' or pathType =='Dubins':
+            finPos, lengthS = dls.PathStoLine(lineSeg, finHdng )
+            if np.isfinite(finPos[0]):
+                lengthsVec.append(lengthS)
+                configsList.append(( (finPos[0], finPos[1], finHdng), 'S', [lengthS] ) )
 
         # Path Type LR to any point on paralellogram edges with given final heading
-        finPosList, lengthsList = dls.LRtoLine(lineSeg, finHdng, rho)   
-        for j in range(len(finPosList)):
-            finPos = finPosList[j]
-            lengthsLR = lengthsList[j]
-            lengthsVec.append(lengthsLR[0])
-            configsList.append(( (finPos[0], finPos[1], finHdng), 'LR', [lengthsLR[1], lengthsLR[2]] ) )
+        if pathType == 'LR' or pathType =='Dubins':
+            finPosList, lengthsList = dls.LRtoLine(lineSeg, finHdng, rho)   
+            for j in range(len(finPosList)):
+                finPos = finPosList[j]
+                lengthsLR = lengthsList[j]
+                lengthsVec.append(lengthsLR[0])
+                configsList.append(( (finPos[0], finPos[1], finHdng), 'LR', [lengthsLR[1], lengthsLR[2]] ) )
 
         # Path Type RL to any point on paralellogram edges with given final heading
-        finPosList, lengthsList = dls.RLtoLine(lineSeg, finHdng, rho)   
-        for j in range(len(finPosList)):
-            finPos = finPosList[j]
-            lengthsRL = lengthsList[j]
-            lengthsVec.append(lengthsRL[0])
-            configsList.append(( (finPos[0], finPos[1], finHdng), 'RL', [lengthsRL[1], lengthsRL[2]] ) )
+        if pathType == 'RL' or pathType =='Dubins':
+            finPosList, lengthsList = dls.RLtoLine(lineSeg, finHdng, rho)   
+            for j in range(len(finPosList)):
+                finPos = finPosList[j]
+                lengthsRL = lengthsList[j]
+                lengthsVec.append(lengthsRL[0])
+                configsList.append(( (finPos[0], finPos[1], finHdng), 'RL', [lengthsRL[1], lengthsRL[2]] ) )
     
         # Path Type LS to any point on paralellogram edges with given final heading
-        finPos, lengthsLS = dls.LStoLine(lineSeg, finHdng, rho) 
-        if np.isfinite(finPos[0]):   
-            lengthsVec.append(lengthsLS[0])
-            configsList.append(( (finPos[0], finPos[1], finHdng), 'LS', [lengthsLS[1], lengthsLS[2]] ) )
+        if pathType == 'LS' or pathType =='Dubins':
+            finPos, lengthsLS = dls.LStoLine(lineSeg, finHdng, rho) 
+            if np.isfinite(finPos[0]):   
+                lengthsVec.append(lengthsLS[0])
+                configsList.append(( (finPos[0], finPos[1], finHdng), 'LS', [lengthsLS[1], lengthsLS[2]] ) )
 
         # Path Type RS to any point on paralellogram edges with given final heading
-        finPos, lengthsRS = dls.RStoLine(lineSeg, finHdng, rho) 
-        if np.isfinite(finPos[0]):   
-            lengthsVec.append(lengthsRS[0])
-            configsList.append(( (finPos[0], finPos[1], finHdng), 'RS', [lengthsRS[1], lengthsRS[2]] ) )
+        if pathType == 'RS' or pathType =='Dubins':
+            finPos, lengthsRS = dls.RStoLine(lineSeg, finHdng, rho) 
+            if np.isfinite(finPos[0]):   
+                lengthsVec.append(lengthsRS[0])
+                configsList.append(( (finPos[0], finPos[1], finHdng), 'RS', [lengthsRS[1], lengthsRS[2]] ) )
 
         # Path Type SL to any point on paralellogram edges with given final heading
-        finPos, lengthsSL = dls.SLtoLine(lineSeg, finHdng, rho) 
-        if np.isfinite(finPos[0]):   
-            lengthsVec.append(lengthsSL[0])
-            configsList.append(( (finPos[0], finPos[1], finHdng), 'SL', [lengthsSL[1], lengthsSL[2]] ) )
+        if pathType == 'SL' or pathType =='Dubins':
+            finPos, lengthsSL = dls.SLtoLine(lineSeg, finHdng, rho) 
+            if np.isfinite(finPos[0]):   
+                lengthsVec.append(lengthsSL[0])
+                configsList.append(( (finPos[0], finPos[1], finHdng), 'SL', [lengthsSL[1], lengthsSL[2]] ) )
 
         # Path Type SR to any point on paralellogram edges with given final heading
-        finPos, lengthsSR = dls.SRtoLine(lineSeg, finHdng, rho) 
-        if np.isfinite(finPos[0]):   
-            lengthsVec.append(lengthsSR[0])
-            configsList.append(( (finPos[0], finPos[1], finHdng), 'SR', [lengthsSR[1], lengthsSR[2]] ) )
+        if pathType == 'SR' or pathType =='Dubins':
+            finPos, lengthsSR = dls.SRtoLine(lineSeg, finHdng, rho) 
+            if np.isfinite(finPos[0]):   
+                lengthsVec.append(lengthsSR[0])
+                configsList.append(( (finPos[0], finPos[1], finHdng), 'SR', [lengthsSR[1], lengthsSR[2]] ) )
 
         # Path Type LSL_min to any point on paralellogram edges with given final heading
-        finPos, lengthLSL_min, pathLSL = dls.LocalMinLSL(lineSeg, finHdng, rho)
-        if np.isfinite(finPos[0]):   
-            lengthsVec.append(lengthLSL_min)
-            configsList.append(( (finPos[0], finPos[1], finHdng), 'LSL', [pathLSL.segment_length(0), pathLSL.segment_length(1), pathLSL.segment_length(2)] ) )
+        if pathType == 'LSL' or pathType =='Dubins':
+            finPos, lengthLSL_min, pathLSL = dls.LocalMinLSL(lineSeg, finHdng, rho)
+            if np.isfinite(finPos[0]):   
+                lengthsVec.append(lengthLSL_min)
+                configsList.append(( (finPos[0], finPos[1], finHdng), 'LSL', [pathLSL.segment_length(0), pathLSL.segment_length(1), pathLSL.segment_length(2)] ) )
 
         # Path Type RSR_min to any point on paralellogram edges with given final heading
-        finPos, lengthRSR_min, pathRSR = dls.LocalMinRSR(lineSeg, finHdng, rho)
-        if np.isfinite(finPos[0]):   
-            lengthsVec.append(lengthRSR_min)
-            configsList.append(( (finPos[0], finPos[1], finHdng), 'RSR', [pathRSR.segment_length(0), pathRSR.segment_length(1), pathRSR.segment_length(2)] ) )
+        if pathType == 'RSR' or pathType =='Dubins':
+            finPos, lengthRSR_min, pathRSR = dls.LocalMinRSR(lineSeg, finHdng, rho)
+            if np.isfinite(finPos[0]):   
+                lengthsVec.append(lengthRSR_min)
+                configsList.append(( (finPos[0], finPos[1], finHdng), 'RSR', [pathRSR.segment_length(0), pathRSR.segment_length(1), pathRSR.segment_length(2)] ) )
 
         # Path Type LSR_min to any point on paralellogram edges with given final heading
-        finPos, lengthLSR_min, pathLSR = dls.LocalMinLSR(lineSeg, finHdng, rho)
-        if np.isfinite(finPos[0]):   
-            lengthsVec.append(lengthLSR_min)
-            configsList.append(( (finPos[0], finPos[1], finHdng), 'LSR', [pathLSR.segment_length(0), pathLSR.segment_length(1), pathLSR.segment_length(2)] ) )
+        if pathType == 'LSR' or pathType =='Dubins':
+            finPos, lengthLSR_min, pathLSR = dls.LocalMinLSR(lineSeg, finHdng, rho)
+            if np.isfinite(finPos[0]):   
+                lengthsVec.append(lengthLSR_min)
+                configsList.append(( (finPos[0], finPos[1], finHdng), 'LSR', [pathLSR.segment_length(0), pathLSR.segment_length(1), pathLSR.segment_length(2)] ) )
 
         # Path Type RSL_min to any point on paralellogram edges with given final heading
-        finPos, lengthRSL_min, pathRSL = dls.LocalMinRSL(lineSeg, finHdng, rho)
-        if np.isfinite(finPos[0]):   
-            lengthsVec.append(lengthRSL_min)
-            configsList.append(( (finPos[0], finPos[1], finHdng), 'RSL', [pathRSL.segment_length(0), pathRSL.segment_length(1), pathRSL.segment_length(2)] ) )
+        if pathType == 'RSL' or pathType =='Dubins':
+            finPos, lengthRSL_min, pathRSL = dls.LocalMinRSL(lineSeg, finHdng, rho)
+            if np.isfinite(finPos[0]):   
+                lengthsVec.append(lengthRSL_min)
+                configsList.append(( (finPos[0], finPos[1], finHdng), 'RSL', [pathRSL.segment_length(0), pathRSL.segment_length(1), pathRSL.segment_length(2)] ) )
 
         # Path Type LRL_feas to any point on paralellogram edges with given final heading
-        finPosList, lengthsList = dls.LRLFeasLimits(lineSeg, finHdng, rho)
-        for j in range(len(finPosList)):
-            finPos = finPosList[j]
-            lengthsLRL = lengthsList[j]        
-            lengthsVec.append(lengthsLRL[0])
-            configsList.append(( (finPos[0], finPos[1], finHdng), 'LRL', lengthsLRL[1:4] ) )
+        if pathType == 'LRL' or pathType =='Dubins':
+            finPosList, lengthsList = dls.LRLFeasLimits(lineSeg, finHdng, rho)
+            for j in range(len(finPosList)):
+                finPos = finPosList[j]
+                lengthsLRL = lengthsList[j]        
+                lengthsVec.append(lengthsLRL[0])
+                configsList.append(( (finPos[0], finPos[1], finHdng), 'LRL', lengthsLRL[1:4] ) )
 
         # Path Type RLR_feas to any point on paralellogram edges with given final heading
-        finPosList, lengthsList = dls.RLRFeasLimits(lineSeg, finHdng, rho)
-        for j in range(len(finPosList)):
-            finPos = finPosList[j]
-            lengthsRLR = lengthsList[j]        
-            lengthsVec.append(lengthsRLR[0])
-            configsList.append(( (finPos[0], finPos[1], finHdng), 'RLR', lengthsRLR[1:4] ) )
+        if pathType == 'RLR' or pathType =='Dubins':
+            finPosList, lengthsList = dls.RLRFeasLimits(lineSeg, finHdng, rho)
+            for j in range(len(finPosList)):
+                finPos = finPosList[j]
+                lengthsRLR = lengthsList[j]        
+                lengthsVec.append(lengthsRLR[0])
+                configsList.append(( (finPos[0], finPos[1], finHdng), 'RLR', lengthsRLR[1:4] ) )
 
         # Shortest Dubins to vertices of the paralellogram
+        if pathType =='Dubins':
+            pathDub = dubins.shortest_path([0,0,0], [prlGrm[k][0], prlGrm[k][1], finHdng ], rho)
+            lengthsVec.append(pathDub.path_length())
+            configsList.append(( (prlGrm[k][0], prlGrm[k][1], finHdng ), du.PathNumtoType(pathDub.path_type()), [pathDub.segment_length(0), pathDub.segment_length(1), pathDub.segment_length(2)] ) )
 
-        pathDub = dubins.shortest_path([0,0,0], [prlGrm[k][0], prlGrm[k][1], finHdng ], rho)
-        lengthsVec.append(pathDub.path_length())
-        configsList.append(( (prlGrm[k][0], prlGrm[k][1], finHdng ), du.PathNumtoType(pathDub.path_type()), [pathDub.segment_length(0), pathDub.segment_length(1), pathDub.segment_length(2)] ) )
+        # Path of given type to vertices of the paralellogram
+        if pathType in ['LSL','LSR','RSL','RSR','LRL','RLR']:
+            pathDub = dubins.path([0,0,0], [prlGrm[k][0], prlGrm[k][1], finHdng ], rho, du.PathTypeToNum(pathType))
+            if pathDub != None:
+                lengthsVec.append(pathDub.path_length())
+                configsList.append(( (prlGrm[k][0], prlGrm[k][1], finHdng ), du.PathNumtoType(pathDub.path_type()), [pathDub.segment_length(0), pathDub.segment_length(1), pathDub.segment_length(2)] ) )
 
-    
+
     lengthsVec = np.array(lengthsVec)
     minLength = np.min(lengthsVec)
     minInd = np.argmin(lengthsVec)
 
     minConfig = configsList[minInd]
     return minLength, minConfig, configsList, lengthsVec
-    # return minLength, finConf, pathType
+    
 
 if __name__ == "__main__":
 
