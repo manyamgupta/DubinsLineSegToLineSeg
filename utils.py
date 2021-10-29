@@ -3,6 +3,7 @@ from numpy import pi,cos,sin
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def IntersectionLineSegments(p1,p2,p3,p4):
     # https://math.stackexchange.com/questions/3176543/intersection-point-of-2-lines-defined-by-2-points-each
     n = p2-p1
@@ -18,7 +19,12 @@ def IntersectionLineSegments(p1,p2,p3,p4):
     intPt = p1+t*(p2-p1)
 
     return intPt
-    
+
+def RotateVec(vec, theta ):
+    # rotates the vec in ccw direction for an angle of theta
+    rotMat = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+    return np.matmul(rotMat, np.array(vec))
+
 def CheckPtLiesInsideLineSeg(a,b,c):
 # check if point c lies inside line segment ab, assume abc are collinear
 
@@ -101,7 +107,7 @@ def MidAng(lb, ub ):
         midang = np.mod(midang, 2*pi)
         return midang
           	
-def PlotPolygon(vertices, segments, col):
+def PlotPolygon(vertices, segments, fmt):
 
     vertices = np.array(vertices)
     segments = np.array(segments)
@@ -110,7 +116,7 @@ def PlotPolygon(vertices, segments, col):
     for i in range(numSegs):
         seg = segments[i,:]
         vertsSeg = vertices[seg,:]
-        plt.plot(vertsSeg[:,0], vertsSeg[:,1], color=col, linewidth=2)
+        plt.plot(vertsSeg[:,0], vertsSeg[:,1], color=fmt.color, linewidth=fmt.linewidth)
 
     return
 
@@ -157,3 +163,4 @@ def PlotParalellogram(prlGrm, fmt):
         PlotLineSeg(prlGrm[k], prlGrm[k+1], fmt)
     
     return
+
