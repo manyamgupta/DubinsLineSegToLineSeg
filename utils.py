@@ -60,7 +60,7 @@ def PlotArc(C, r, phis,col):
     
 
 def Angdiff(ti, tf ):
-   
+#    Angular difference from ti to tf, the interval is assumed to be ccw
     ti = np.mod(ti, 2*pi)
     tf = np.mod(tf, 2*pi)
     
@@ -74,7 +74,7 @@ def Angdiff(ti, tf ):
     return diff
     
 def InInt(lb, ub, t ):   
-    
+    # Checks if t is in the interval (lb, ub), interval goes ccs from lb to ub
     lb = np.mod(lb, 2*pi)
     ub = np.mod(ub, 2*pi)
     t = np.mod(t, 2*pi) 
@@ -90,7 +90,7 @@ def InInt(lb, ub, t ):
             return False
             
 def MidAng(lb, ub ):  
-    
+    # finds the middle angle between lb and up, going ccw from lb to ub
     lb = np.mod(lb, 2*pi)
     ub = np.mod(ub, 2*pi)
     
