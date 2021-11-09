@@ -141,8 +141,8 @@ def DubinsLineToLine(line1, sector1, line2, sector2, rho):
             minLengthsList.append(0)
             minConfigsList.append((sector1[i], (0,0,0), 'None', [0] ) )
         #find the minimum path from [0,0,0] to the paralellogram with heading as lower boundary of sector2
-        minLength1, minConfig1, configsList, lengthsVec = dpgm.DubinsToPrlgrm(prlGrm_rot, sector2_rot[0], rho)
-        minLength2, minConfig2, configsList, lengthsVec = dpgm.DubinsToPrlgrm(prlGrm_rot, sector2_rot[1], rho)
+        minLength1, minConfig1 = dpgm.DubinsToPrlgrm(prlGrm_rot, sector2_rot[0], rho)
+        minLength2, minConfig2 = dpgm.DubinsToPrlgrm(prlGrm_rot, sector2_rot[1], rho)
         minLengthsList.append(minLength1)
         minLengthsList.append(minLength2)
         minConfigsList.append( (sector1[i], minConfig1[0], minConfig1[1], minConfig1[2]) )
@@ -295,10 +295,10 @@ def DubLineToLineNum(line1, sector1, line2, sector2, rho):
 if __name__ == "__main__":
     plotformat = namedtuple("plotformat","color linewidth linestyle marker")
 
-    line1 = [(0,0), (5,0)]
-    line2 = [(1,-2), (4,3)]
-    sector1 = [.5, .75]
-    sector2 = [2, 3]
+    line1 = [(0,0), (5,1)]
+    line2 = [(2,2), (3,5)]
+    sector1 = [.25, 1]
+    sector2 = [1, 3]
     rho = 1
 
     start = time.time()

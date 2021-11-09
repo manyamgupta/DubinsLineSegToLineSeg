@@ -2,7 +2,9 @@
 from numpy import pi,cos,sin
 import numpy as np
 import matplotlib.pyplot as plt
+from types import SimpleNamespace
 
+defaultFmt = SimpleNamespace(color='blue', linewidth=2, linestyle='-', marker='x')
 
 def IntersectionLineSegments(p1,p2,p3,p4):
     # https://math.stackexchange.com/questions/3176543/intersection-point-of-2-lines-defined-by-2-points-each
@@ -151,13 +153,13 @@ def PlotArrow(p1, hdng, arrLen, fmt):
     plt.arrow(p1[0],p1[1],dx,dy,head_width=.1*np.sqrt(dx**2+dy**2),color=fmt.color,linewidth=fmt.linewidth, linestyle=fmt.linestyle)
     return
 
-def PlotLineSeg(p1, p2, fmt):
+def PlotLineSeg(p1, p2, fmt=defaultFmt):
 
     plt.plot([p1[0],p2[0]], [p1[1],p2[1]], color=fmt.color, linewidth=fmt.linewidth, linestyle=fmt.linestyle) 
 
     return
 
-def PlotParalellogram(prlGrm, fmt):
+def PlotParalellogram(prlGrm, fmt=defaultFmt):
     prlGrm.append(prlGrm[0])
     for k in range(4):
         PlotLineSeg(prlGrm[k], prlGrm[k+1], fmt)

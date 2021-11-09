@@ -22,8 +22,9 @@ def DubinsToPrlgrm(prlGrm, finHdng, rho, pathType='Dubins'):
     # Assumes start config is [0,0,0]
 
     minLength = np.nan
+    minConfig = [np.nan, np.nan, np.nan]
     prlgrmPoly = Polygon(prlGrm)
-    prlGrm.append(prlGrm[0])
+    # prlGrm.append(prlGrm[0])
     lengthsVec = []
     configsList = []
 
@@ -31,7 +32,6 @@ def DubinsToPrlgrm(prlGrm, finHdng, rho, pathType='Dubins'):
         if prlgrmPoly.contains(Point(0,0)) and np.abs(finHdng)<=1e-8:
             lengthsVec.append(0)
             configsList.append(( (0,0,0), 'None', [0] ) )
-
 
     # Path Type L to any point with given final heading
     if pathType == 'L' or pathType =='Dubins':
@@ -49,7 +49,7 @@ def DubinsToPrlgrm(prlGrm, finHdng, rho, pathType='Dubins'):
 
     for k in range(4):
                 
-        lineSeg = np.array([prlGrm[k], prlGrm[k+1]])
+        lineSeg = np.array([prlGrm[k], prlGrm[np.mod(k+1,4)]])
 
         # Path Type S to any point on paralellogram edges with given final heading
         if pathType == 'S' or pathType =='Dubins':
@@ -110,6 +110,7 @@ def DubinsToPrlgrm(prlGrm, finHdng, rho, pathType='Dubins'):
             if np.isfinite(finPos[0]):   
                 lengthsVec.append(lengthLSL_min)
                 configsList.append(( (finPos[0], finPos[1], finHdng), 'LSL', [pathLSL.segment_length(0), pathLSL.segment_length(1), pathLSL.segment_length(2)] ) )
+                # du.PlotDubinsPath(pathLSL)
 
         # Path Type RSR_min to any point on paralellogram edges with given final heading
         if pathType == 'RSR' or pathType =='Dubins':
@@ -156,6 +157,7 @@ def DubinsToPrlgrm(prlGrm, finHdng, rho, pathType='Dubins'):
             lengthsVec.append(pathDub.path_length())
             configsList.append(( (prlGrm[k][0], prlGrm[k][1], finHdng ), du.PathNumtoType(pathDub.path_type()), [pathDub.segment_length(0), pathDub.segment_length(1), pathDub.segment_length(2)] ) )
 
+
         # Path of given type to vertices of the paralellogram
         if pathType in ['LSL','LSR','RSL','RSR','LRL','RLR']:
             pathDub = dubins.path([0,0,0], [prlGrm[k][0], prlGrm[k][1], finHdng ], rho, du.PathTypeToNum(pathType))
@@ -163,13 +165,18 @@ def DubinsToPrlgrm(prlGrm, finHdng, rho, pathType='Dubins'):
                 lengthsVec.append(pathDub.path_length())
                 configsList.append(( (prlGrm[k][0], prlGrm[k][1], finHdng ), du.PathNumtoType(pathDub.path_type()), [pathDub.segment_length(0), pathDub.segment_length(1), pathDub.segment_length(2)] ) )
 
-
     lengthsVec = np.array(lengthsVec)
-    minLength = np.min(lengthsVec)
-    minInd = np.argmin(lengthsVec)
+    if lengthsVec.size >0:
+        minLength = np.min(lengthsVec)
+        minInd = np.argmin(lengthsVec)
+        minConfig = configsList[minInd]         
+    # utils.PlotParalellogram(prlGrm)
+    # for i in range(len(lengthsVec)):
+    #     du.PlotDubPathSegments([0,0,0], configsList[i][1], configsList[i][2], rho)
+    # plt.axis('equal')
 
-    minConfig = configsList[minInd]
-    return minLength, minConfig, configsList, lengthsVec
+
+    return minLength, minConfig
     
 
 if __name__ == "__main__":
@@ -183,10 +190,9 @@ if __name__ == "__main__":
     plotformat = namedtuple("plotformat","color linewidth linestyle marker")
 
     start = time.time()
-    minLength, minConfig, configsList, lengthsVec = DubinsToPrlgrm(prlGrm, finHdng, rho)
+    minLength, minConfig = DubinsToPrlgrm(prlGrm, finHdng, rho)
     computation_time = time.time()-start
-    print(f"{configsList=}")
-    print(f"{lengthsVec=}")
+
     print(f"{minLength=}")
     print(f"{minConfig=}")
     print(f"{computation_time=}")
@@ -195,15 +201,3 @@ if __name__ == "__main__":
     utils.PlotArrow([0,0],0,1, plotformat('c',2,'--','x'))
     du.PlotDubPathSegments([0,0,0],minConfig[1],minConfig[2],rho, plotformat('b',2,'-',''))
     plt.axis('equal')
-    # norm = mpl.colors.Normalize(1,4)
-    # cmap = mpl.cm.ScalarMappable(norm=norm, cmap=mpl.cm.Blues)
-    # cmap.set_array([])
-    plt.figure()
-    for config in configsList:
-        # plt.figure()
-        utils.PlotParalellogram(prlGrm, plotformat('g',2,'-','x'))
-        utils.PlotArrow([0,0],0,1, plotformat('c',2,'--','x'))
-        # plt.subplot(4, 4, du.PathTypeNum(config[1]))        
-        du.PlotDubPathSegments([0,0,0],config[1],config[2],rho, plotformat(np.random.random(3),2,'--',''))
-        plt.axis('equal')
-    plt.show()

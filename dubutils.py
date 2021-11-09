@@ -13,8 +13,10 @@ from collections import namedtuple
 import utils
 import time
 import dubins
+from types import SimpleNamespace
 
-def PlotDubinsPath(dubPath,fmt):
+deffmt = SimpleNamespace(color='blue', linewidth=2, linestyle='-', marker='x')
+def PlotDubinsPath(dubPath,fmt=deffmt):
     qs, _ = dubPath.sample_many(.02)    
     qs = np.array(qs)
     xs = qs[:, 0]
@@ -22,15 +24,15 @@ def PlotDubinsPath(dubPath,fmt):
     plt.plot(xs, ys, color=fmt.color, linewidth=fmt.linewidth, linestyle=fmt.linestyle) 
     return qs
 
-def PlotDubPathSegments(iniConf, pathMode, segLengths, rho, fmt):
+def PlotDubPathSegments(iniConf, pathMode, segLengths, rho, fmt=deffmt):
 
-    startConf = iniConf
-    for k in range(len(pathMode)):
-        startConf = PlotSegment(startConf, segLengths[k], pathMode[k], rho, fmt)
+    if pathMode != 'None':
+        for k in range(len(pathMode)):
+            iniConf = PlotSegment(iniConf, segLengths[k], pathMode[k], rho, fmt)
 
     return
 
-def PlotArc(cntr, rho, angPosEnds, fmt):
+def PlotArc(cntr, rho, angPosEnds, fmt=deffmt):
     # Arcs are defined by the center, radius and the angular positions of the ends
     # The input angPosEnds1/2 shoudl contain two values of the ends, and the arc always goes in ccw from first to second
 
@@ -41,10 +43,11 @@ def PlotArc(cntr, rho, angPosEnds, fmt):
     PlotSegment(startConf, segLength, 'L', rho, fmt)
 
     return
-def PlotSegment(startConf, segLength, segType, rho, fmt):
+def PlotSegment(startConf, segLength, segType, rho, fmt=deffmt):
 
     pt1 = startConf[0:2]
     t1 = startConf[2]
+           
     if segType == 'S':
         pt2 = startConf[0:2] + segLength*np.array([cos(t1), sin(t1)])
         plt.plot([pt1[0],pt2[0]], [pt1[1],pt2[1]], color=fmt.color, linewidth=fmt.linewidth, linestyle=fmt.linestyle)
@@ -74,7 +77,7 @@ def PathTypeNum(ptype):
 
 def PathTypeToNum(ptype):
 
-    typesList = ['LSL', 'LSR', 'RSL', 'RSR', 'LRL', 'RLR']
+    typesList = ['LSL', 'LSR', 'RSL', 'RSR', 'RLR', 'LRL']
     indx = typesList.index(ptype)
     return indx
 
@@ -133,7 +136,7 @@ def LengthOfLR(iniConf, finConf, rho):
     phi1 = np.mod(pi/2 + gamma, 2*pi)
     phi2 = np.mod(phi1-finConf[2], 2*pi)
     lenLR = rho*(phi1+phi2)
-    lengths = np.array([lenLR, phi1, phi2])
+    lengths = np.array([lenLR, rho*phi1, rho*phi2])
 
     return lengths
 
