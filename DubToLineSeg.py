@@ -178,6 +178,13 @@ def LStoLine(lineSeg, finHdng, rho):
     # alpha = np.arcsin(rho/np.linalg.norm(C-A))
     # beta = np.arcsin(rho/np.linalg.norm(C-B))
     # finHdngRange = (angleCB+beta, angleCA+alpha)
+    if A[1]==B[1] and A[1]>=rho and finHdng == np.pi/2:
+        if A[0] <=rho and B[0]>=rho:
+            finPos = [rho, A[1]]
+            ls = A[1]-rho
+            lengthsLS = [rho*finHdng+ls, rho*finHdng, ls]
+            
+        
     lam = (A[1]*cos(finHdng)-A[0]*sin(finHdng)+rho-rho*cos(finHdng))/( (B[0]-A[0])*sin(finHdng)-(B[1]-A[1])*cos(finHdng) )
     # if utils.InInt(finHdngRange[0], finHdngRange[1], finHdng):
     if lam>=0 and lam<=1:
@@ -228,17 +235,21 @@ def SLtoLine(lineSeg, finHdng, rho):
         A = lineSeg[1]; B = lineSeg[0]
     lengthsSL = [np.nan, np.nan, np.nan]
     finPos = [np.nan, np.nan]
-    if (B[1]-A[1]) != 0:
+    if np.abs((B[1]-A[1])) >= 1e-8:
         lam = (rho-rho*cos(finHdng)-A[1])/(B[1]-A[1])
         ls = A[0]+lam*(B[0]-A[0])-rho*sin(finHdng)
         if lam>=0 and lam <=1 and ls>0:
             finPos = (1-lam)*A + lam*B        
-            lengthsSL = [ls+rho*finHdng, ls, rho*finHdng]
-        
+            lengthsSL = [ls+rho*finHdng, ls, rho*finHdng]        
     else:
         if A[1]>0 and A[1]< 2*rho:
-            print("To Do: SL to horizontal line")
-
+            theta_f = np.arccos(1-A[1]/rho)
+            if utils.Angdiff(theta_f,finHdng)<1e-8 or utils.Angdiff(finHdng, theta_f)<1e-8:
+                if A[0]>rho*sin(finHdng):
+                    finPos = A
+                    ls = A[0]-rho*sin(finHdng)
+                    lengthsSL = [ls+rho*finHdng, ls, rho*finHdng]
+                    # In other cases, the min SL path becomes L
     return finPos, lengthsSL
 
 def SRtoLine(lineSeg, finHdng, rho):
@@ -641,20 +652,20 @@ if __name__ == "__main__":
     # lineSeg = np.array([ (2,-1), (-2,3)])
     # lineSeg = np.array([ [-1.10515082, -2.69789578],
     #    [-2.79923152,  0.40534294]])
-    lineSeg = np.array([[-0.60801441, -4.19884728],
-       [ 2.00763017,  3.99617581]])
-    # finHdng = 2.5
-    rho =2
-    finPt, finHdngRL, lensLocalMinRL = LocalMinRL(lineSeg, rho)
+    # lineSeg = np.array([[-0.60801441, -4.19884728],
+    #    [ 2.00763017,  3.99617581]])
+    # # finHdng = 2.5
+    # rho =2
+    # finPt, finHdngRL, lensLocalMinRL = LocalMinRL(lineSeg, rho)
     
-    if np.isfinite(lensLocalMinRL[0]):
-        C1 = np.array([0,-rho])
-        utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'--',''))
-        utils.PlotCircle(C1, rho,plotformat('g',2,'--',''))
-        du.PlotDubPathSegments(iniConf, 'RL', lensLocalMinRL[1:3], rho, plotformat('b',2,'-',''))
+    # if np.isfinite(lensLocalMinRL[0]):
+    #     C1 = np.array([0,-rho])
+    #     utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'--',''))
+    #     utils.PlotCircle(C1, rho,plotformat('g',2,'--',''))
+    #     du.PlotDubPathSegments(iniConf, 'RL', lensLocalMinRL[1:3], rho, plotformat('b',2,'-',''))
         
-    plt.axis('equal')
-    plt.show()
+    # plt.axis('equal')
+    # plt.show()
 
     # finPtsList, lengthsList = RLtoLine(lineSeg, finHdng, rho)
     # utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'--',''))
@@ -776,22 +787,23 @@ if __name__ == "__main__":
 # ############################# Test LS to line #############################
     # lineSeg = np.array([ (4,3), (-1,-3)])
     # lineSeg = np.array([ (2,-3), (3,4) ])
-
-    # finHdng = 1
-    # finPos, lengthsLS = LStoLine(lineSeg, finHdng, rho)
-    # C1 = np.array([0,rho])
+    lineSeg = np.array([ (1,3), (5,3) ])
+    rho=3
+    finHdng = np.pi/2
+    finPos, lengthsLS = LStoLine(lineSeg, finHdng, rho)
+    C1 = np.array([0,rho])
     
-    # utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'--',''))
-    # utils.PlotCircle(C1, rho,plotformat('g',2,'--',''))
+    utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'--',''))
+    utils.PlotCircle(C1, rho,plotformat('g',2,'--',''))
 
-    # if isfinite(finPos[0]):
-    #     du.PlotDubPathSegments([0,0,0],'LS',lengthsLS[1:3],rho,plotformat('b',2,'-',''))
-    #     utils.PlotArrow(finPos, finHdng, 1, plotformat('m',2,'--',''))
-    #     print(f"{lengthsLS=}")
+    if isfinite(finPos[0]):
+        du.PlotDubPathSegments([0,0,0],'LS',lengthsLS[1:3],rho,plotformat('b',2,'-',''))
+        utils.PlotArrow(finPos, finHdng, 1, plotformat('m',2,'--',''))
+        print(f"{lengthsLS=}")
         
         
-    # plt.axis('equal')
-    # plt.show()
+    plt.axis('equal')
+    plt.show()
 
 # ############################# Test RS to line #############################
 #     # lineSeg = np.array([ (4,3), (-1,-3)])
@@ -814,10 +826,13 @@ if __name__ == "__main__":
 #     plt.show()
 
 ############################# Test SL to line #############################
-    # # lineSeg = np.array([ (4,3), (-1,-3)])
-    # lineSeg = np.array([ (0,2), (4,3) ])
-
-    # finHdng = 2
+    # lineSeg = np.array([ (4,3), (-1,-3)])
+    # finHdng = 1
+    
+    # rho = 2
+    # lineSeg = np.array([ (1.5,1.5), (4,1.5)])
+    # finHdng = np.arccos(1-1.5/rho)
+    
     # finPos, lengthsSL = SLtoLine(lineSeg, finHdng, rho)
     
     # utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'--',''))
