@@ -149,7 +149,7 @@ def DubinsLineToLine(line1, sector1, line2, sector2, rho):
         minConfigsList.append( (sector1[i], minConfig2[0], minConfig2[1], minConfig2[2])  )
 
         for k in range(4):
-            lineSeg = np.array([prlGrm_rot[k], prlGrm_rot[k+1]])
+            lineSeg = np.array([prlGrm_rot[k], prlGrm_rot[np.mod(k+1,4)]])
             #path L from [0,0,0] to the line segment, final heading not specified
             finPosList, finHdngList, lengthsList = dls.LtoLine(lineSeg, rho)
             for j in range(len(lengthsList)):
