@@ -293,14 +293,14 @@ def DubinsLineToLineV2(line1, sector1, line2, sector2, rho):
                 minLengthsList.append(lengthS)
                 minConfigsList.append( (sector1[0], (finPt[0], finPt[1], finHdng), 'S', [lengthS] ) )
 
-    plt.figure()
-    prlgrm = LinesToPrlGrm(line1, line2)
-    fmt = SimpleNamespace(color='m',linewidth=2, linestyle='--')
-    utils.PlotParalellogram(prlgrm,fmt)
-    plt.axis('equal')
-    for k in range(len(minLengthsList)):
-        du.PlotDubPathSegments([line1[0][0], line1[0][1], minConfigsList[k][0]], minConfigsList[k][2], minConfigsList[k][3], rho)
-        print(str(minConfigsList[k][2])+": "+ str(minLengthsList[k])+ ": " + str(minConfigsList[k][3]))
+    # plt.figure()
+    # prlgrm = LinesToPrlGrm(line1, line2)
+    # fmt = SimpleNamespace(color='m',linewidth=2, linestyle='--')
+    # utils.PlotParalellogram(prlgrm,fmt)
+    # plt.axis('equal')
+    # for k in range(len(minLengthsList)):
+    #     du.PlotDubPathSegments([line1[0][0], line1[0][1], minConfigsList[k][0]], minConfigsList[k][2], minConfigsList[k][3], rho)
+        # print(str(minConfigsList[k][2])+": "+ str(minLengthsList[k])+ ": " + str(minConfigsList[k][3]))
 
     ############################################################################################################
     ######### The paths with free initial heading and fixed final angle
@@ -334,14 +334,14 @@ def DubinsLineToLineV2(line1, sector1, line2, sector2, rho):
             minLengthsList_bkwd.append(minLength_bkwd)    
             minConfigsList_bkwd.append( (sector1_bkwd[0], minConfig_bkwd[0], minConfig_bkwd[1], minConfig_bkwd[2])  )
 
-    print("Backward paths:")
-    plt.figure()
-    prlgrm_bkwd = LinesToPrlGrm(line1_bkwd, line2_bkwd)
-    fmt = SimpleNamespace(color='m',linewidth=2, linestyle='--')
-    utils.PlotParalellogram(prlgrm_bkwd,fmt)
-    for k in range(len(minLengthsList_bkwd)):
-        du.PlotDubPathSegments([line1_bkwd[0][0], line1_bkwd[0][1], minConfigsList_bkwd[k][0]], minConfigsList_bkwd[k][2], minConfigsList_bkwd[k][3], rho)
-        print(str(minConfigsList_bkwd[k][2])+": "+ str(minLengthsList_bkwd[k]) + ": " + str(minConfigsList_bkwd[k][3]) )
+    # print("Backward paths:")
+    # plt.figure()
+    # prlgrm_bkwd = LinesToPrlGrm(line1_bkwd, line2_bkwd)
+    # fmt = SimpleNamespace(color='m',linewidth=2, linestyle='--')
+    # utils.PlotParalellogram(prlgrm_bkwd,fmt)
+    # for k in range(len(minLengthsList_bkwd)):
+    #     du.PlotDubPathSegments([line1_bkwd[0][0], line1_bkwd[0][1], minConfigsList_bkwd[k][0]], minConfigsList_bkwd[k][2], minConfigsList_bkwd[k][3], rho)
+        # print(str(minConfigsList_bkwd[k][2])+": "+ str(minLengthsList_bkwd[k]) + ": " + str(minConfigsList_bkwd[k][3]) )
 
     
     minLengthsVec = np.array(minLengthsList)
