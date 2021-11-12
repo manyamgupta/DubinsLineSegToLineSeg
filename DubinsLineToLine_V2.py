@@ -224,8 +224,9 @@ def DubinsLineToLineV2(line1, sector1, line2, sector2, rho):
 
     #minimum LSR path from [0,0,0] to the paralellogram with final heading as upper boundary of sector2
     minLength, minConfig = dpgm.DubinsToPrlgrm(prlGrm_rot, sector2_rot[1], rho, 'LSR')
-    minLengthsList.append(minLength)
-    minConfigsList.append( (sector1[1], minConfig[0], minConfig[1], minConfig[2]) )
+    if np.isfinite(minLength):
+        minLengthsList.append(minLength)
+        minConfigsList.append( (sector1[1], minConfig[0], minConfig[1], minConfig[2]) )
 
     for pType in ['LSL', 'LRL']:
         #minimum LSL or LRL path from [0,0,0] to the paralellogram with final heading as lower boundary of sector2
@@ -260,8 +261,9 @@ def DubinsLineToLineV2(line1, sector1, line2, sector2, rho):
 
     #minimum RSL path from [0,0,0] to the paralellogram with final heading as lower boundary of sector2
     minLength, minConfig = dpgm.DubinsToPrlgrm(prlGrm_rot, sector2_rot[0], rho, 'RSL')
-    minLengthsList.append(minLength)
-    minConfigsList.append( (sector1[0], minConfig[0], minConfig[1], minConfig[2]) )
+    if np.isfinite(minLength):
+        minLengthsList.append(minLength)
+        minConfigsList.append( (sector1[0], minConfig[0], minConfig[1], minConfig[2]) )
 
     for pType in ['RSR', 'RLR']:
         # #minimum RSR or RLR path from [0,0,0] to the paralellogram with final heading as upper boundary of sector2
@@ -400,11 +402,17 @@ def FindMinConfsSG(minConfig, line1, line2):
 if __name__ == "__main__":
     plotformat = namedtuple("plotformat","color linewidth linestyle marker")
 
-    line1 = [(-1,-1), (6,4)]
-    line2 = [(2,2), (4, 6)]
-    sector1 = [1, 2.5]
-    sector2 = [5, 6]
-    rho = 2
+    # line1 = [(-1,-1), (6,4)]
+    # line2 = [(2,2), (4, 6)]
+    # sector1 = [1, 2.5]
+    # sector2 = [5, 6]
+    # rho = 2
+
+    line1 = [(1.6011775335101202, 8.0), (1.6011775335101202, 6.458123168926677)]
+    line2 = [(2.0, 8.0), (2.0, 7.25)]
+    sector1 = [0.0, 3.141592653589793]
+    sector2 = [3.141592653589793, 6.283185307179586]
+    rho = 1.5
 
     start = time.time()
     minLength, minConfStart, minConfGoal, minPathType, minPathSegLengths = DubinsLineToLineV2(line1, sector1, line2, sector2, rho)
@@ -421,13 +429,14 @@ if __name__ == "__main__":
     utils.PlotLineSeg(line2[0], line2[1], plotformat('g',2,'-',''))
     
     if minPathType != 'None':
+        
         du.PlotDubPathSegments(minConfStart, minPathType, minPathSegLengths,rho, plotformat('b',2,'-',''))
-        utils.PlotArrow(minConfStart[0:2], sector1[0], 1, plotformat('c',2, '-','x'))
-        utils.PlotArrow(minConfStart[0:2], sector1[1], 1, plotformat('c',2,'-','x'))
-        utils.PlotArrow(minConfGoal[0:2], sector2[0], 1, plotformat('c',2,'-','x'))
-        utils.PlotArrow(minConfGoal[0:2], sector2[1], 1, plotformat('c',2,'-','x'))
-        utils.PlotArrow(minConfStart[0:2], minConfStart[2], 1, plotformat('m',2,'dotted','x'))
-        utils.PlotArrow(minConfGoal[0:2], minConfGoal[2], 1, plotformat('m',2,'dotted','x'))
+        utils.PlotArrow(minConfStart[0:2], sector1[0], .1*minLength, plotformat('c',2, '-','x'))
+        utils.PlotArrow(minConfStart[0:2], sector1[1], .1*minLength, plotformat('c',2,'-','x'))
+        utils.PlotArrow(minConfGoal[0:2], sector2[0], .1*minLength, plotformat('c',2,'-','x'))
+        utils.PlotArrow(minConfGoal[0:2], sector2[1], .1*minLength, plotformat('c',2,'-','x'))
+        utils.PlotArrow(minConfStart[0:2], minConfStart[2], .1*minLength, plotformat('m',2,'dotted','x'))
+        utils.PlotArrow(minConfGoal[0:2], minConfGoal[2], .1*minLength, plotformat('m',2,'dotted','x'))
 
     plt.axis('equal')
 
