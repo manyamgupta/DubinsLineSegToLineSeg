@@ -66,7 +66,9 @@ def Angdiff(ti, tf ):
     ti = np.mod(ti, 2*pi)
     tf = np.mod(tf, 2*pi)
     
-    if (InInt(ti, tf, 0)):
+    if ti == tf:
+        return 0
+    elif (InInt(ti, tf, 0)):
         diff = tf+(2*pi-ti)
     else:
         diff = tf-ti
