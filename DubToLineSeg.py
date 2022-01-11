@@ -178,13 +178,45 @@ def LStoLine(lineSeg, finHdng, rho):
     # alpha = np.arcsin(rho/np.linalg.norm(C-A))
     # beta = np.arcsin(rho/np.linalg.norm(C-B))
     # finHdngRange = (angleCB+beta, angleCA+alpha)
-    if A[1]==B[1] and A[1]>=rho and finHdng == np.pi/2:
-        if A[0] <=rho and B[0]>=rho:
-            finPos = [rho, A[1]]
-            ls = A[1]-rho
-            lengthsLS = [rho*finHdng+ls, rho*finHdng, ls]
+    # case: theta_f aligns with BA orientation
+    
+    if np.abs(du.DistPtToLineSeg(C, lineSeg) -rho)<1e-8:
+        orientBA = np.mod(np.arctan2(A[1]-B[1], A[0]-B[0]), 2*np.pi)
+        if  np.abs(orientBA- finHdng)<1e-8:
+            infPt = C + rho*np.array([np.cos(-np.pi/2+orientBA), np.sin(-np.pi/2+orientBA) ])
+            if du.CheckPtLiesOnLineSeg(infPt, [B, A]):
+                finPos = infPt
+                lengthsLS = [rho*finHdng, rho*finHdng, 0]
+            else:
+                finPos = B
+                ls = np.linalg.norm(infPt-B)
+                lengthsLS = [rho*finHdng+ls, rho*finHdng, ls]
+        return finPos, lengthsLS
+    
             
+    # case: AB is vertical and theta_f=pi/2
+    # if A[0]==B[0] and np.mod(finHdng,np.pi) == np.pi/2:
+    #     if A[0] == rho and finHdng == np.pi/2:
+    #         if min(A[1],B[1]) <= rho and max(A[1],B[1]) > rho:
+    #             finPos = [rho, rho]
+    #             ls = 0  
+    #             lengthsLS = [rho*finHdng+ls, rho*finHdng, ls]              
+    #         elif A[1] > rho and B[1] > rho:
+    #             finPos = [rho, min(A[1], B[1]) ]
+    #             ls = min(A[1], B[1])-rho
+    #             lengthsLS = [rho*finHdng+ls, rho*finHdng, ls]
+    #     if A[0] == -rho and finHdng == 3*np.pi/2:
+    #         if min(A[1],B[1]) <= rho and max(A[1],B[1]) > rho:
+    #             finPos = [-rho, rho]
+    #             ls = 0        
+    #             lengthsLS = [rho*finHdng+ls, rho*finHdng, ls]        
+    #         elif A[1] < rho and B[1] < rho:
+    #             finPos = [-rho, max(A[1], B[1]) ]
+    #             ls = rho-max(A[1], B[1])
+    #             lengthsLS = [rho*finHdng+ls, rho*finHdng, ls]
+    #     return finPos, lengthsLS
         
+    
     lam = (A[1]*cos(finHdng)-A[0]*sin(finHdng)+rho-rho*cos(finHdng))/( (B[0]-A[0])*sin(finHdng)-(B[1]-A[1])*cos(finHdng) )
     # if utils.InInt(finHdngRange[0], finHdngRange[1], finHdng):
     if lam>=0 and lam<=1:
@@ -694,16 +726,16 @@ if __name__ == "__main__":
     #     plt.show()
 
     # ############################# Test RSR #############################
-    # lineSeg = np.array([(1,4) , (4, 2)])
-    # finHdng = -2
-    # finPt, lengthRSR, pathRSR = LocalMinRSR(lineSeg, finHdng, rho)
-    # print("finPt: ",finPt)
-    # if isfinite(finPt[0]):
-    #     du.PlotDubinsPath(pathRSR, plotformat('b',2,'-',''))
-    #     utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'-','x'))
-    #     utils.PlotArrow(finPt, finHdng, 1, plotformat('m',2,'-',''))
-    #     plt.axis('equal')
-    #     plt.show()
+    lineSeg = np.array([(-2.5,2) , (0.5, 1)])
+    finHdng = .25
+    finPt, lengthRSR, pathRSR = LocalMinRSR(lineSeg, finHdng, rho)
+    print("finPt: ",finPt)
+    if isfinite(finPt[0]):
+        du.PlotDubinsPath(pathRSR, plotformat('b',2,'-',''))
+        utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'-','x'))
+        utils.PlotArrow(finPt, finHdng, 1, plotformat('m',2,'-',''))
+        plt.axis('equal')
+        plt.show()
     ############################# Test LSR #############################
     # lineSeg = np.array([[ 2.82665526,  0.10010022], [-1.51342785,  2.77660515]])
     # finHdng = 2.25
@@ -787,23 +819,27 @@ if __name__ == "__main__":
 # ############################# Test LS to line #############################
     # lineSeg = np.array([ (4,3), (-1,-3)])
     # lineSeg = np.array([ (2,-3), (3,4) ])
-    lineSeg = np.array([ (1,3), (5,3) ])
-    rho=3
-    finHdng = np.pi/2
-    finPos, lengthsLS = LStoLine(lineSeg, finHdng, rho)
-    C1 = np.array([0,rho])
+    # lineSeg = np.array([ (1.5,3), (5,3) ])
+    # lineSeg = np.array([ (-2,1), (-2,-6) ])
+    # rho=2
+    # refPt = np.array([rho*np.cos(3*pi/2+pi), rho+rho*np.sin(3*pi/2+pi)])
+    # lineSeg = np.array([ refPt+np.array([-1,0]), refPt+np.array([-4,0]) ])
     
-    utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'--',''))
-    utils.PlotCircle(C1, rho,plotformat('g',2,'--',''))
+    # finHdng = pi
+    # finPos, lengthsLS = LStoLine(lineSeg, finHdng, rho)
+    # C1 = np.array([0,rho])
+    
+    # utils.PlotLineSeg(lineSeg[0], lineSeg[1], plotformat('c',2,'--',''))
+    # utils.PlotCircle(C1, rho,plotformat('g',2,'--',''))
 
-    if isfinite(finPos[0]):
-        du.PlotDubPathSegments([0,0,0],'LS',lengthsLS[1:3],rho,plotformat('b',2,'-',''))
-        utils.PlotArrow(finPos, finHdng, 1, plotformat('m',2,'--',''))
-        print(f"{lengthsLS=}")
+    # if isfinite(finPos[0]):
+    #     du.PlotDubPathSegments([0,0,0],'LS',lengthsLS[1:3],rho,plotformat('b',2,'-',''))
+    #     utils.PlotArrow(finPos, finHdng, 1, plotformat('m',2,'--',''))
+    #     print(f"{lengthsLS=}")
         
         
-    plt.axis('equal')
-    plt.show()
+    # plt.axis('equal')
+    # plt.show()
 
 # ############################# Test RS to line #############################
 #     # lineSeg = np.array([ (4,3), (-1,-3)])

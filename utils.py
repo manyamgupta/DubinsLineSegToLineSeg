@@ -78,11 +78,14 @@ def Angdiff(ti, tf ):
     return diff
     
 def InInt(lb, ub, t ):   
-    # Checks if t is in the interval (lb, ub), interval goes ccs from lb to ub
+    # Checks if t is in the interval (lb, ub), interval goes ccw from lb to ub
     lb = np.mod(lb, 2*pi)
     ub = np.mod(ub, 2*pi)
     t = np.mod(t, 2*pi) 
-    if (lb >= ub):
+    if lb==ub:
+        print("improper interval, lb and ub cannot be the same")
+        return False
+    elif (lb > ub):
         if(t >= lb or t <= ub):
             return True
         else:
@@ -98,18 +101,35 @@ def MidAng(lb, ub ):
     lb = np.mod(lb, 2*pi)
     ub = np.mod(ub, 2*pi)
     
-    
-    if InInt(lb, ub, 0 ):
-        
-        midang = (lb-2*pi+ub)/2
-        midang = np.mod(midang, 2*pi)
-        return midang
-        
+    if lb == 0:
+        case =1
+    elif ub ==0:
+        case =2
+    elif InInt(lb, ub, 0 ):
+        case =2
     else:
-        
+        case =1
+    
+    if case ==1:
         midang = (lb+ub)/2
         midang = np.mod(midang, 2*pi)
         return midang
+    elif case==2:
+        midang = (lb-2*pi+ub)/2
+        midang = np.mod(midang, 2*pi)
+        return midang     
+               
+    # if InInt(lb, ub, 0 ):
+        
+    #     midang = (lb-2*pi+ub)/2
+    #     midang = np.mod(midang, 2*pi)
+    #     return midang
+        
+    # else:
+        
+    #     midang = (lb+ub)/2
+    #     midang = np.mod(midang, 2*pi)
+    #     return midang
           	
 def PlotPolygon(vertices, segments, fmt):
 
