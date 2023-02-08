@@ -1,9 +1,14 @@
-from cmath import isfinite
+# Author: Satyanarayana Gupta Manyam
+# Udpate Date: Feb 8th, 2023
+# This file contains the Line2LineDubins Class and the functions necessary to compute the
+# minimum Dubins Line to Line path
+# The inputs to the class are the line1, interval1, line2, interval2, rho
+# The function 'MinDub_L2L' computes the minimum path and its length
+
 import numpy as np
 from numpy import pi,cos,sin
 import matplotlib.pyplot as plt
 import dubins
-import DubToLineSeg as dubp2l
 import utils
 import dubutils as du
 from types import SimpleNamespace
@@ -87,10 +92,10 @@ class Line2LineDubins:
     def MinDub_L2L(self):
         # Computes the list of candidate paths for minimum line to line dubins paths        
         # returns the length of the minimum path, minimum path, and candidate paths
-        theta_1_l = self.int1[0]
-        theta_1_u = self.int1[1]
-        theta_2_l = self.int2[0]
-        theta_2_u = self.int2[1]
+        # theta_1_l = self.int1[0]
+        # theta_1_u = self.int1[1]
+        # theta_2_l = self.int2[0]
+        # theta_2_u = self.int2[1]
         
         ######################## Paths b/w Boundary points, interval boundaries ########################
         self.AddBoundaryPaths()
