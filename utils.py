@@ -1,10 +1,6 @@
-# Author: Satyanarayana Gupta Manyam
 from numpy import pi,cos,sin
 import numpy as np
 import matplotlib.pyplot as plt
-from types import SimpleNamespace
-
-defaultFmt = SimpleNamespace(color='blue', linewidth=2, linestyle='-', marker='x')
 
 def IntersectionLineSegments(p1,p2,p3,p4):
     # https://math.stackexchange.com/questions/3176543/intersection-point-of-2-lines-defined-by-2-points-each
@@ -22,11 +18,29 @@ def IntersectionLineSegments(p1,p2,p3,p4):
 
     return intPt
 
-def RotateVec(vec, theta ):
-    # rotates the vec in ccw direction for an angle of theta
-    rotMat = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
-    return np.matmul(rotMat, np.array(vec))
+def IntersectionLineSegments2(line1, line2):
+    # https://math.stackexchange.com/questions/3176543/intersection-point-of-2-lines-defined-by-2-points-each
+    p1 = np.array(line1.point1)
+    p2 = np.array(line1.point2)
+    p3 = np.array(line2.point1)
+    p4 = np.array(line2.point2)
+    n = p2-p1
+    m = p3-p4
+    p = p3-p1
 
+    D = n[0]*m[1]-n[1]*m[0]
+    if np.abs(D) < 1e-6:
+        return (None, None)
+    Qx = m[1]*p[0]-m[0]*p[1]
+    t = Qx/D
+    
+    intPt = p1+t*(p2-p1)
+    if CheckPtLiesInsideLineSeg(p1, p2, intPt) and CheckPtLiesInsideLineSeg(p3, p4, intPt):
+        return intPt
+    else:
+        return (None, None)
+
+    
 def CheckPtLiesInsideLineSeg(a,b,c):
 # check if point c lies inside line segment ab, assume abc are collinear
 
@@ -62,13 +76,11 @@ def PlotArc(C, r, phis,col):
     
 
 def Angdiff(ti, tf ):
-#    Angular difference from ti to tf, the interval is assumed to be ccw
+   
     ti = np.mod(ti, 2*pi)
     tf = np.mod(tf, 2*pi)
     
-    if ti == tf:
-        return 0
-    elif (InInt(ti, tf, 0)):
+    if (InInt(ti, tf, 0)):
         diff = tf+(2*pi-ti)
     else:
         diff = tf-ti
@@ -79,6 +91,9 @@ def Angdiff(ti, tf ):
     
 def InInt(lb, ub, t ):   
     # Checks if t is in the interval (lb, ub), interval goes ccw from lb to ub
+    if t is None or np.isnan(t):
+        # print('invalid value for t: '+str(t))
+        return False
     lb = np.mod(lb, 2*pi)
     ub = np.mod(ub, 2*pi)
     t = np.mod(t, 2*pi) 
@@ -86,12 +101,16 @@ def InInt(lb, ub, t ):
         print("improper interval, lb and ub cannot be the same")
         return False
     elif (lb > ub):
-        if(t >= lb or t <= ub):
+        if (t >= lb or t <= ub): 
+            return True
+        elif np.abs(t-lb)<1e-6 or np.abs(t-ub)<1e-6:
             return True
         else:
             return False
     else:
-        if(t >= lb and t <= ub):
+        if (t >= lb and t <= ub):
+            return True
+        elif np.abs(t-lb)<1e-6 or np.abs(t-ub)<1e-6:
             return True
         else:
             return False
@@ -117,21 +136,35 @@ def MidAng(lb, ub ):
     elif case==2:
         midang = (lb-2*pi+ub)/2
         midang = np.mod(midang, 2*pi)
-        return midang     
-               
-    # if InInt(lb, ub, 0 ):
-        
-    #     midang = (lb-2*pi+ub)/2
-    #     midang = np.mod(midang, 2*pi)
-    #     return midang
-        
-    # else:
-        
-    #     midang = (lb+ub)/2
-    #     midang = np.mod(midang, 2*pi)
-    #     return midang
-          	
-def PlotPolygon(vertices, segments, fmt):
+        return midang  
+def CheckIntrvsIntersect(intr1, intr2):
+    
+    if InInt(intr1[0], intr1[1], intr2[0] ) or InInt(intr1[0], intr1[1], intr2[1] ):
+        return True
+    elif InInt(intr2[0], intr2[1], intr1[0] ) or InInt(intr2[0], intr2[1], intr1[1] ):
+        return True        
+    else:
+        return False
+          
+def CommonAngle(intr1, intr2):
+    # Assumes the interval intersects, and returns one common angle
+    if InInt(intr1[0], intr1[1], intr2[0] ):
+        return intr2[0]
+    elif InInt(intr1[0], intr1[1], intr2[1] ):
+        return intr2[1]
+    elif InInt(intr2[0], intr2[1], intr1[0] ):
+        return intr1[0]     
+    elif  InInt(intr2[0], intr2[1], intr1[1] ):
+        return intr1[1]
+    else:
+        return None
+    
+def RotateVec(vec, theta ):
+    # rotates the vec in ccw direction for an angle of theta
+    # returns tuple
+    return (np.cos(theta)*vec[0]-np.sin(theta)*vec[1], np.sin(theta)*vec[0]+np.cos(theta)*vec[1])
+            	
+def PlotPolygon(vertices, segments, col):
 
     vertices = np.array(vertices)
     segments = np.array(segments)
@@ -140,7 +173,7 @@ def PlotPolygon(vertices, segments, fmt):
     for i in range(numSegs):
         seg = segments[i,:]
         vertsSeg = vertices[seg,:]
-        plt.plot(vertsSeg[:,0], vertsSeg[:,1], color=fmt.color, linewidth=fmt.linewidth)
+        plt.plot(vertsSeg[:,0], vertsSeg[:,1], color=col, linewidth=2)
 
     return
 
@@ -175,16 +208,14 @@ def PlotArrow(p1, hdng, arrLen, fmt):
     plt.arrow(p1[0],p1[1],dx,dy,head_width=.1*np.sqrt(dx**2+dy**2),color=fmt.color,linewidth=fmt.linewidth, linestyle=fmt.linestyle)
     return
 
-def PlotLineSeg(p1, p2, fmt=defaultFmt):
+def PlotInterval(pos, intr, fmt):
+    PlotArrow(pos, intr[0], fmt.arrLen, fmt)
+    PlotArrow(pos, intr[1], fmt.arrLen, fmt)
+    
+    return
+    
+def PlotLineSeg(p1, p2, fmt):
 
     plt.plot([p1[0],p2[0]], [p1[1],p2[1]], color=fmt.color, linewidth=fmt.linewidth, linestyle=fmt.linestyle) 
 
     return
-
-def PlotParalellogram(prlGrm, fmt=defaultFmt):
-    prlGrm.append(prlGrm[0])
-    for k in range(4):
-        PlotLineSeg(prlGrm[k], prlGrm[k+1], fmt)
-    
-    return
-
