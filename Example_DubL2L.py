@@ -14,7 +14,7 @@ import DubinsL2L as dl2l
 import matplotlib.pyplot as plt
 import numpy as np    
 
-rho = 8
+rho = 7
 
 # line1=dl2l.LineSegment(point1=(94, -54), point2=(18, -29))
 # line2=dl2l.LineSegment(point1=(18, -33), point2=(67, -41))
