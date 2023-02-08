@@ -14,7 +14,6 @@ import DubinsL2L as dl2l
 import matplotlib.pyplot as plt
 import numpy as np    
 
-
 rho = 8
 
 # line1=dl2l.LineSegment(point1=(94, -54), point2=(18, -29))
@@ -31,7 +30,6 @@ int1 = (t_1_l, t_1_l+np.pi/4)
 int2 = (t_2_l, t_2_l+np.pi/4)
 
 plotFlag  = True
-
 ## computing shortest line to line dubins path using analytical results
 tic = timer()
 L2LDub = dl2l.Line2LineDubins(line1, int1, line2, int2, rho) 
