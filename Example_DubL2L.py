@@ -14,7 +14,7 @@ import DubinsL2L as dl2l
 import matplotlib.pyplot as plt
 import numpy as np    
 
-rho = 7
+rho = 8
 
 # line1=dl2l.LineSegment(point1=(94, -54), point2=(18, -29))
 # line2=dl2l.LineSegment(point1=(18, -33), point2=(67, -41))
@@ -24,15 +24,18 @@ rho = 7
 pts = np.random.randint(0,80,8)
 t_1_l = np.random.rand()*np.pi*2
 t_2_l = np.random.rand()*np.pi*2
-line1 = dl2l.LineSegment((pts[0], pts[1]), (pts[2], pts[3])) 
-line2 = dl2l.LineSegment((pts[4], pts[5]), (pts[6], pts[7]))
+# line1 = dl2l.LineSegment((pts[0], pts[1]), (pts[2], pts[3])) 
+# line2 = dl2l.LineSegment((pts[4], pts[5]), (pts[6], pts[7]))
+lineSeg1 = [(pts[0], pts[1]), (pts[2], pts[3])]
+lineSeg2 = [(pts[4], pts[5]), (pts[6], pts[7])]
+
 int1 = (t_1_l, t_1_l+np.pi/4)
 int2 = (t_2_l, t_2_l+np.pi/4)
 
 plotFlag  = True
 ## computing shortest line to line dubins path using analytical results
 tic = timer()
-L2LDub = dl2l.Line2LineDubins(line1, int1, line2, int2, rho) 
+L2LDub = dl2l.Line2LineDubins(lineSeg1, int1, lineSeg2, int2, rho) 
 minLength, minPath = L2LDub.MinDub_L2L()   #This returns the length of the minimum path, minimum path, and all the candidate paths
 comp_time = timer()-tic
 print(f"{minLength=}")
@@ -47,8 +50,8 @@ if plotFlag:
     linesegfmt = SimpleNamespace(color='m', linewidth=1.5, linestyle='-', marker='x',endPoints=True)        
     pathfmt = SimpleNamespace(color='b', linewidth=2, linestyle='-', marker='x', endPoints=False)    
     arrfmt = SimpleNamespace(color='g', linewidth=1, linestyle='--', marker='x', arrLen=10)       
-    utils.PlotLineSeg(line1.point1, line1.point2, linesegfmt)
-    utils.PlotLineSeg(line2.point1, line2.point2, linesegfmt)
+    utils.PlotLineSeg(lineSeg1[0], lineSeg1[1], linesegfmt)
+    utils.PlotLineSeg(lineSeg2[0], lineSeg2[1], linesegfmt)
     if minLength:   
         arrfmt = SimpleNamespace(color='g', linewidth=1, linestyle='--', marker='x', arrLen=10)                   
         utils.PlotInterval(minPath.iniPos, int1, arrfmt)
@@ -57,7 +60,6 @@ if plotFlag:
         arrfmt = SimpleNamespace(color='c', linewidth=1, linestyle='--', marker='x', arrLen=10)           
         utils.PlotArrow(minPath.finalPos, minPath.finalHead, 10, arrfmt) 
         utils.PlotArrow(minPath.iniPos, minPath.iniHead, 10, arrfmt)            
-
-        
+ 
     plt.axis('equal')
     plt.show()

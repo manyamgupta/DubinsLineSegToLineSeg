@@ -45,11 +45,14 @@ class CandidatePath:
     
 class Line2LineDubins:
     
-    def __init__(self, line1, int1, line2, int2, rho):   
+    def __init__(self, lineSgmt1, int1, lineSgmt2, int2, rho):   
         
-        self.line1 = copy.copy(line1)
-        self.int1 = copy.copy(int1)        
-        self.line2 = copy.copy(line2)
+        # self.line1 = copy.copy(line1)             
+        # self.line2 = copy.copy(line2)
+        self.line1 = LineSegment(lineSgmt1[0], lineSgmt1[1])
+        self.line2 = LineSegment(lineSgmt2[0], lineSgmt2[1])
+        
+        self.int1 = copy.copy(int1)   
         self.int2 = copy.copy(int2)        
         self.rho = rho 
         
@@ -327,7 +330,7 @@ class Line2LineDubins:
         return candLen, cp
 
     def AddSRPaths(self):
-        L2LDubRev = Line2LineDubins(self.line2, (self.int2[0]+np.pi,self.int2[1]+np.pi), self.line1, (self.int1[0]+np.pi,self.int1[1]+np.pi), self.rho) 
+        L2LDubRev = Line2LineDubins([self.line2.point1, self.line2.point2], (self.int2[0]+np.pi,self.int2[1]+np.pi), [self.line1.point1, self.line1.point2], (self.int1[0]+np.pi,self.int1[1]+np.pi), self.rho) 
         L2LDubRev.AddLSPaths()
         for cp_r in L2LDubRev.candPathsList:            
             cp = CandidatePath('SR', cp_r.finalPos , np.mod(cp_r.finalHead+np.pi, 2*np.pi), cp_r.iniPos, np.mod(cp_r.iniHead+np.pi, 2*np.pi), cp_r.segLengths[::-1])
@@ -339,7 +342,7 @@ class Line2LineDubins:
         return
 
     def AddSLPaths(self):
-        L2LDubRev = Line2LineDubins(self.line2, (self.int2[0]+np.pi,self.int2[1]+np.pi), self.line1, (self.int1[0]+np.pi,self.int1[1]+np.pi), self.rho) 
+        L2LDubRev = Line2LineDubins([self.line2.point1, self.line2.point2], (self.int2[0]+np.pi,self.int2[1]+np.pi), [self.line1.point1, self.line1.point2], (self.int1[0]+np.pi,self.int1[1]+np.pi), self.rho) 
         L2LDubRev.AddRSPaths()
         for cp_r in L2LDubRev.candPathsList:            
             cp = CandidatePath('SL', cp_r.finalPos , np.mod(cp_r.finalHead+np.pi, 2*np.pi), cp_r.iniPos, np.mod(cp_r.iniHead+np.pi, 2*np.pi), cp_r.segLengths[::-1])
@@ -910,7 +913,7 @@ class Line2LineDubins:
         int2_rfl = (-self.int2[1], -self.int2[0])
         
         
-        L2LDubRfl = Line2LineDubins(line1_rfl, int1_rfl, line2_rfl, int2_rfl, self.rho) 
+        L2LDubRfl = Line2LineDubins([line1_rfl.point1, line1_rfl.point2], int1_rfl, [line2_rfl.point1, line2_rfl.point2], int2_rfl, self.rho) 
         L2LDubRfl.AddLRPaths()
         for cp_r in L2LDubRfl.candPathsList:            
             cp = CandidatePath('RL', du.PtReflectionXaxis(cp_r.iniPos) , np.mod(-cp_r.iniHead, 2*np.pi), du.PtReflectionXaxis(cp_r.finalPos), np.mod(-cp_r.finalHead, 2*np.pi), cp_r.segLengths)
@@ -1190,7 +1193,7 @@ class Line2LineDubins:
         int2_rfl = (-self.int2[1], -self.int2[0])
         
         
-        L2LDubRfl = Line2LineDubins(line1_rfl, int1_rfl, line2_rfl, int2_rfl, self.rho) 
+        L2LDubRfl = Line2LineDubins([line1_rfl.point1, line1_rfl.point2], int1_rfl, [line2_rfl.point1, line2_rfl.point2 ], int2_rfl, self.rho) 
         L2LDubRfl.AddLPaths()
         for cp_r in L2LDubRfl.candPathsList:            
             # cp = CandidatePath('R', du.PtReflectionXaxis(cp_r.iniPos) , np.mod(-cp_r.iniHead, 2*np.pi), du.PtReflectionXaxis(cp_r.finalPos), np.mod(-cp_r.finalHead, 2*np.pi), cp_r.segLengths)
