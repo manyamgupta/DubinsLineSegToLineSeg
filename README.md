@@ -12,3 +12,18 @@ matplotlib (pyplot for plotting)
 dubins
 dataclasses
 timit (for checking computation time)
+
+This code uses the shortest Dubins path from line-segment-interval to line-segment-interval from the paper below
+https://www.roboticsproceedings.org/rss19/p059.html
+
+
+Citation:
+@INPROCEEDINGS{Manyam-RSS-23, 
+    AUTHOR    = {Satyanarayana Gupta Manyam AND Abhishek Nayak AND Sivakumar  Rathinam}, 
+    TITLE     = {{G*: A New Approach to Bounding Curvature Constrained Shortest Paths through Dubins Gates}}, 
+    BOOKTITLE = {Proceedings of Robotics: Science and Systems}, 
+    YEAR      = {2023}, 
+    ADDRESS   = {Daegu, Republic of Korea}, 
+    MONTH     = {July}, 
+    DOI       = {10.15607/RSS.2023.XIX.059} 
+}
