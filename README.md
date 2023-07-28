@@ -5,3 +5,10 @@ Given the initial and final line segments and intervals, and this code finds the
 The shortest path is computed by finding the candidate optimal paths for each mdoe of Dubins paths: LSL, LSR, RSL, RSR, LRL, RLR, LS, RS, SL, SR, LR, RL, L, R, and S.
 
 Check the "Example_DubL2L.py" for usage.
+
+Required packages:
+numpy
+matplotlib (pyplot for plotting)
+dubins
+dataclasses
+timit (for checking computation time)
